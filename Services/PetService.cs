@@ -14,11 +14,11 @@ public static class PetService
                 new Pet { Id = 1, Name = "Cinnamon", Breed = "Rabbit", Color = "Brown", Coat = "Short",
                     Description = "Funny guy", Microchip = "12345", Sex = "Female", Fixed = true,
                     Weight = 3.1, Birthday = DateTime.Now, AdoptionDay = DateTime.Now,
-                    PetPhoto = "pet"},
+                    PetPhoto = { DbLink = "/Resources/Files/1/cat.jpg" } },
                 new Pet { Id = 2, Name = "Fruit Loop", Breed = "Rabbit", Color = "Brown", Coat = "Short",
                     Description = "Funny guy", Microchip = "12345", Sex = "Female", Fixed = true,
                     Weight = 3.1, Birthday = DateTime.Now, AdoptionDay = DateTime.Now,
-                    VetRecords = "vet", PetPhoto = "pet", Vaccinations = Vaccine }
+                    Vaccinations = Vaccine }
             };
     }
 

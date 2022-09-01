@@ -24,9 +24,8 @@ public record Pet
     public double Weight { get; set; }
     public DateTime? Birthday { get; set; }
     public DateTime? AdoptionDay { get; set; }
-    public string VetRecords { get; set; } = string.Empty;
-    [Required]
-    public string PetPhoto { get; set; } = string.Empty;
+    public FileLink VetRecords { get; set; }
+    public FileLink PetPhoto { get; set; }
     public Prescription[]? Prescriptions { get; set; }
     public Vaccination[]? Vaccinations { get; set; }
     public Condition[]? Conditions { get; set; }
@@ -58,4 +57,9 @@ public record Condition
     [Required]
     public string Name { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
+}
+
+public record FileLink
+{
+    public string DbLink { get; set; } = string.Empty;
 }
