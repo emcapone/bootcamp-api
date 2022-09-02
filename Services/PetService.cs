@@ -8,13 +8,13 @@ public static class PetService
     static int nextId = 3;
     static PetService()
     {
+        FileLink File = new FileLink { DbLink = "example/folder/file.jpg" };
         Vaccination[] Vaccine = new Vaccination[] { new Vaccination{ Id = 1, Name = "Rabies", DueDate = DateTime.Now } };
         Pets = new List<Pet>
             {
                 new Pet { Id = 1, Name = "Cinnamon", Breed = "Rabbit", Color = "Brown", Coat = "Short",
                     Description = "Funny guy", Microchip = "12345", Sex = "Female", Fixed = true,
-                    Weight = 3.1, Birthday = DateTime.Now, AdoptionDay = DateTime.Now,
-                    PetPhoto = { DbLink = "/Resources/Files/1/cat.jpg" } },
+                    Weight = 3.1, Birthday = DateTime.Now, AdoptionDay = DateTime.Now, PetPhoto = File },
                 new Pet { Id = 2, Name = "Fruit Loop", Breed = "Rabbit", Color = "Brown", Coat = "Short",
                     Description = "Funny guy", Microchip = "12345", Sex = "Female", Fixed = true,
                     Weight = 3.1, Birthday = DateTime.Now, AdoptionDay = DateTime.Now,

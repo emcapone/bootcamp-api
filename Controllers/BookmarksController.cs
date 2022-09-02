@@ -90,6 +90,6 @@ public class BookmarksController : ControllerBase
 
         BookmarkService.Delete(id);
 
-        return NoContent();
+        return Ok();
     }
 }
