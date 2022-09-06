@@ -12,8 +12,6 @@ public record Pet
     [Required]
     public string Color { get; set; } = string.Empty;
     [Required]
-    public string Coat { get; set; } = string.Empty;
-    [Required]
     public string Description { get; set; } = string.Empty;
     public string Microchip { get; set; } = string.Empty;
     [Required]
@@ -24,10 +22,10 @@ public record Pet
     public double Weight { get; set; }
     public DateTime? Birthday { get; set; }
     public DateTime? AdoptionDay { get; set; }
-    public FileLink VetRecords { get; set; }
-    public FileLink PetPhoto { get; set; }
+    public FileLink? VetRecords { get; set; }
+    public FileLink? PetPhoto { get; set; }
     public Prescription[]? Prescriptions { get; set; }
-    public Vaccination[]? Vaccinations { get; set; }
+    public Vaccine[]? Vaccines { get; set; }
     public Condition[]? Conditions { get; set; }
 }
 
@@ -40,7 +38,7 @@ public record Prescription
     public int Refills { get; set; }
 }
 
-public record Vaccination
+public record Vaccine
 {
     public int Id { get; set; }
     [Required]
@@ -61,5 +59,5 @@ public record Condition
 
 public record FileLink
 {
-    public string DbLink { get; set; } = string.Empty;
+    public string DbPath { get; set; } = string.Empty;
 }

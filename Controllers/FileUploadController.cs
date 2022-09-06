@@ -23,19 +23,19 @@ public class FileUploadController : ControllerBase
     /// <remarks>
     /// The body accepts FormData containing at least one file.
     /// Only the first file will be uploaded.
-    /// The file is saved to Resources/Images/{user_id}/{folder}
+    /// The file is saved to Resources/Users/{user_id}/{pet_id}/{folder}
     /// </remarks>
     /// <param name="user_id">The current user's ID</param>
     /// <param name="folder">The folder the new file should be contained in.</param>
-    [HttpPost("{user_id}/{folder}"), DisableRequestSizeLimit]
+    [HttpPost("{user_id}/{pet_id}/{folder}"), DisableRequestSizeLimit]
     [SwaggerResponse(200, "A new file was uploaded.", typeof(String))]
     [SwaggerResponse(400, "The request is invalid.", typeof(ProblemDetails))]
-    public IActionResult Upload(int user_id, string folder)
+    public IActionResult Upload(int user_id, int pet_id, string folder)
     {
         try
         {
             var file = Request.Form.Files[0];
-            var folderName = Path.Combine("Resources", "Files", user_id.ToString(), folder);
+            var folderName = Path.Combine("Resources", "Users", user_id.ToString(), pet_id.ToString(), folder);
             System.IO.Directory.CreateDirectory(folderName);
             ClearDirectory(folderName);
             var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
