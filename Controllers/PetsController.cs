@@ -6,13 +6,18 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace bootcamp_api.Controllers;
 
+/// <summary>
+/// Handles incoming HTTP requests for pets
+/// </summary>
 [ApiController]
 [Produces("application/json")]
 [Consumes("application/json")]
-[SwaggerResponse(500, "An error occurred while processing the request", typeof(ProblemDetails))]
 [Route("[controller]")]
 public class PetsController : ControllerBase
 {
+    /// <summary>
+    /// PetsController constructor
+    /// </summary>
     public PetsController()
     {
     }
@@ -21,16 +26,16 @@ public class PetsController : ControllerBase
     /// Returns all pets
     /// </summary>
     [HttpGet]
-    [SwaggerResponse(200, "The pet(s) are returned.", typeof(Pet[]))]
+    [ProducesResponseType(typeof(Pet[]), StatusCodes.Status200OK)]
     public ActionResult<List<Pet>> GetAll() =>
-        PetService.GetAll();
+        Ok(PetService.GetAll());
 
     /// <summary>
     /// Returns a pet with a given id
     /// </summary>
     [HttpGet("{id}")]
-    [SwaggerResponse(200, "The pet is returned.", typeof(Pet))]
-    [SwaggerResponse(404, "A pet with the given id does not exist.", typeof(ProblemDetails))]
+    [ProducesResponseType(typeof(Pet), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public ActionResult<Pet> Get(int id)
     {
         var pet = PetService.Get(id);
@@ -38,15 +43,15 @@ public class PetsController : ControllerBase
         if (pet == null)
             return NotFound();
 
-        return pet;
+        return Ok(pet);
     }
     
     /// <summary>
     /// Creates a new pet
     /// </summary>
     [HttpPost]
-    [SwaggerResponse(201, "A new pet was created.", typeof(Pet))]
-    [SwaggerResponse(400, "The request is invalid.", typeof(ProblemDetails))]
+    [ProducesResponseType(typeof(Pet), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public IActionResult Create(Pet pet)
     {
         PetService.Add(pet);
@@ -58,9 +63,9 @@ public class PetsController : ControllerBase
     /// Updates a pet with a given id
     /// </summary>
     [HttpPut("{id}")]
-    [SwaggerResponse(204, "The pet with the given id was updated.")]
-    [SwaggerResponse(400, "The request is invalid.", typeof(ProblemDetails))]
-    [SwaggerResponse(404, "A pet with the given id does not exist.", typeof(ProblemDetails))]
+    [ProducesResponseType(typeof(Pet), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public IActionResult Update(int id, Pet pet)
     {
         if (id != pet.Id)
@@ -72,16 +77,16 @@ public class PetsController : ControllerBase
 
         PetService.Update(pet);
 
-        return NoContent();
+        return Ok(pet);
     }
     
     /// <summary>
     /// Deletes a pet with a given id
     /// </summary>
     [HttpDelete("{id}")]
-    [SwaggerResponse(200, "The pet with the given id has been deleted.")]
-    [SwaggerResponse(400, "The request is invalid.", typeof(ProblemDetails))]
-    [SwaggerResponse(404, "A pet with the given id does not exist.", typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public IActionResult Delete(int id)
     {
         var pet = PetService.Get(id);
@@ -91,6 +96,6 @@ public class PetsController : ControllerBase
 
         PetService.Delete(id);
 
-        return Ok();
+        return NoContent();
     }
 }

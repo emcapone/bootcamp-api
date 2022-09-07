@@ -5,13 +5,18 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace bootcamp_api.Controllers;
 
+/// <summary>
+/// Handles incoming HTTP requests for bookmarks
+/// </summary>
 [ApiController]
 [Produces("application/json")]
 [Consumes("application/json")]
-[SwaggerResponse(500, "An error occurred while processing the request", typeof(ProblemDetails))]
 [Route("[controller]")]
 public class BookmarksController : ControllerBase
 {
+    /// <summary>
+    /// BookmarksController constructor
+    /// </summary>
     public BookmarksController()
     {
     }
@@ -20,17 +25,17 @@ public class BookmarksController : ControllerBase
     /// Returns all bookmarks
     /// </summary>
     [HttpGet]
-    [SwaggerResponse(200, "The bookmark(s) are returned.", typeof(Bookmark[]))]
+    [ProducesResponseType(typeof(Bookmark[]), StatusCodes.Status200OK)]
     public ActionResult<List<Bookmark>> GetAll() =>
-        BookmarkService.GetAll();
+        Ok(BookmarkService.GetAll());
 
     
     /// <summary>
     /// Returns a bookmark with a given id
     /// </summary>
     [HttpGet("{id}")]
-    [SwaggerResponse(200, "The bookmark is returned.", typeof(Bookmark))]
-    [SwaggerResponse(404, "A bookmark with the given id does not exist.", typeof(ProblemDetails))]
+    [ProducesResponseType(typeof(Bookmark), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public ActionResult<Bookmark> Get(int id)
     {
         var bookmark = BookmarkService.Get(id);
@@ -38,15 +43,15 @@ public class BookmarksController : ControllerBase
         if (bookmark == null)
             return NotFound();
 
-        return bookmark;
+        return Ok(bookmark);
     }
 
     /// <summary>
     /// Creates a new bookmark
     /// </summary>
     [HttpPost]
-    [SwaggerResponse(201, "A new bookmark was created.", typeof(Bookmark))]
-    [SwaggerResponse(400, "The request is invalid.", typeof(ProblemDetails))]
+    [ProducesResponseType(typeof(Bookmark), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public IActionResult Create(Bookmark bookmark)
     {
         BookmarkService.Add(bookmark);
@@ -57,9 +62,9 @@ public class BookmarksController : ControllerBase
     /// Updates a bookmark with a given id
     /// </summary>
     [HttpPut("{id}")]
-    [SwaggerResponse(204, "The bookmark with the given id was updated.")]
-    [SwaggerResponse(400, "The request is invalid.", typeof(ProblemDetails))]
-    [SwaggerResponse(404, "A bookmark with the given id does not exist.", typeof(ProblemDetails))]
+    [ProducesResponseType(typeof(Bookmark), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public IActionResult Update(int id, Bookmark bookmark)
     {
         if (id != bookmark.Id)
@@ -71,16 +76,16 @@ public class BookmarksController : ControllerBase
 
         BookmarkService.Update(bookmark);
 
-        return NoContent();
+        return Ok(bookmark);
     }
 
     /// <summary>
     /// Deletes a bookmark with a given id
     /// </summary>
     [HttpDelete("{id}")]
-    [SwaggerResponse(200, "The bookmark with the given id has been deleted.")]
-    [SwaggerResponse(400, "The request is invalid.", typeof(ProblemDetails))]
-    [SwaggerResponse(404, "A bookmark with the given id does not exist.", typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public IActionResult Delete(int id)
     {
         var bookmark = BookmarkService.Get(id);
@@ -90,6 +95,6 @@ public class BookmarksController : ControllerBase
 
         BookmarkService.Delete(id);
 
-        return Ok();
+        return NoContent();
     }
 }

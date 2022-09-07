@@ -12,8 +12,10 @@ using System.Net.Http.Headers;
 
 namespace bootcamp_api.Controllers;
 
+/// <summary>
+/// Handles incoming HTTP requests for uploading files
+/// </summary>
 [ApiController]
-[SwaggerResponse(500, "An error occurred while processing the request", typeof(String))]
 [Route("[controller]")]
 public class FileUploadController : ControllerBase
 {
@@ -26,10 +28,11 @@ public class FileUploadController : ControllerBase
     /// The file is saved to Resources/Users/{user_id}/{pet_id}/{folder}
     /// </remarks>
     /// <param name="user_id">The current user's ID</param>
+    /// <param name="pet_id">The current pet's ID</param>
     /// <param name="folder">The folder the new file should be contained in.</param>
     [HttpPost("{user_id}/{pet_id}/{folder}"), DisableRequestSizeLimit]
-    [SwaggerResponse(200, "A new file was uploaded.", typeof(String))]
-    [SwaggerResponse(400, "The request is invalid.", typeof(ProblemDetails))]
+    [ProducesResponseType(typeof(FileLink), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public IActionResult Upload(int user_id, int pet_id, string folder)
     {
         try
@@ -60,10 +63,14 @@ public class FileUploadController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Internal server error: {ex}");
+            return StatusCode(500, "Internal server error");
         }
     }
 
+    /// <summary>
+    /// Clears a given directory
+    /// </summary>
+    /// <param name="path">The path of the directory to clear</param>
     public static void ClearDirectory(string path)
     {
         System.IO.DirectoryInfo di = new DirectoryInfo(path);
