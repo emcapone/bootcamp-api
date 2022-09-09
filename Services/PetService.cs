@@ -8,17 +8,18 @@ public static class PetService
     static int nextId = 3;
     static PetService()
     {
-        Vaccination[] Vaccine = new Vaccination[] { new Vaccination{ Id = 1, Name = "Rabies", DueDate = DateTime.Now } };
+        FileLink VetFile = new FileLink { DbPath = "Resources\\Users\\1\\1\\Vet%20Records\\vet-records.pdf" };
+        FileLink PhotoFile = new FileLink { DbPath = "Resources\\Users\\1\\1\\Pet%20Photo\\cat.jpg" };
+        Vaccine[] Vaccine = new Vaccine[] { new Vaccine{ Id = 1, Name = "Rabies", DueDate = DateTime.Now } };
         Pets = new List<Pet>
             {
-                new Pet { Id = 1, Name = "Cinnamon", Breed = "Rabbit", Color = "Brown", Coat = "Short",
+                new Pet { Id = 1, Name = "Cinnamon", Breed = "Rabbit", Color = "Brown",
+                    Description = "Funny guy", Microchip = "12345", Sex = "Female", Fixed = true,
+                    Weight = 3.1, Birthday = DateTime.Now, AdoptionDay = DateTime.Now, VetRecords = VetFile, PetPhoto = PhotoFile },
+                new Pet { Id = 2, Name = "Fruit Loop", Breed = "Rabbit", Color = "Brown",
                     Description = "Funny guy", Microchip = "12345", Sex = "Female", Fixed = true,
                     Weight = 3.1, Birthday = DateTime.Now, AdoptionDay = DateTime.Now,
-                    PetPhoto = "pet"},
-                new Pet { Id = 2, Name = "Fruit Loop", Breed = "Rabbit", Color = "Brown", Coat = "Short",
-                    Description = "Funny guy", Microchip = "12345", Sex = "Female", Fixed = true,
-                    Weight = 3.1, Birthday = DateTime.Now, AdoptionDay = DateTime.Now,
-                    VetRecords = "vet", PetPhoto = "pet", Vaccinations = Vaccine }
+                    Vaccines = Vaccine }
             };
     }
 
