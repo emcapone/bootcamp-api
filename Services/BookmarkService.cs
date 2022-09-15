@@ -1,47 +1,83 @@
-using bootcamp_api.Models;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Linq;
+using Domain;
+using bootcamp_api.Exceptions;
+using Microsoft.EntityFrameworkCore;
+using bootcamp_api.Data;
 
-namespace bootcamp_api.Services;
-
-public static class BookmarkService
+namespace bootcamp_api.Services
 {
-    static List<Bookmark> Bookmarks { get; }
-    static int nextId = 3;
-    static BookmarkService()
+    public class BookmarkService: IBookmarkService
     {
-        Bookmarks = new List<Bookmark>
+
+        private readonly PawssierContext _context;
+
+        public BookmarkService(PawssierContext context)
+        {
+            _context = context;
+        }
+
+        public Bookmark[] GetAll()
+        {
+            var bookmarks = _context.Bookmarks;
+
+            return bookmarks.OrderBy(b => b.Id).ToArray();
+        }
+
+        public Bookmark Get(int id)
+        {
+            var bookmark = _context.Bookmarks.SingleOrDefault(b => b.Id == id);
+            if (bookmark == null)
+                throw new BookmarkNotFoundException(id);
+
+            return bookmark;
+        }
+
+        public Bookmark Add(Dto.Bookmark bookmark)
+        {
+
+            DateTime now = DateTime.Now;
+            var newBookmark = new Bookmark
             {
-                new Bookmark { Id = 1, Link = "testlink.co", Petfinder_Id = 12354, Title = "Fig Newton", Note = "Rabbit from Petfinder",
-                                SavedAt = DateTime.Now, External_Url = "somelink.com" },
-                new Bookmark { Id = 2, Link = "testlink.co", Petfinder_Id = 12354, Title = "Fig Newton", Note = "Rabbit from Petfinder",
-                                SavedAt = DateTime.Now, External_Url = "somelink.com" },
+                Id = bookmark.Id,
+                External_Url = bookmark.External_Url,
+                Link = bookmark.Link,
+                Title = bookmark.Title,
+                Note = bookmark.Note,
+                SavedAt = bookmark.SavedAt is null ? now : bookmark.SavedAt,
+                Petfinder_Id = bookmark.Petfinder_Id,
+                DateModified = now
             };
-    }
 
-    public static List<Bookmark> GetAll() => Bookmarks;
+            _context.Bookmarks.Add(newBookmark);
+            _context.SaveChanges();
 
-    public static Bookmark? Get(int id) => Bookmarks.FirstOrDefault(p => p.Id == id);
+            return newBookmark;
+        }
 
-    public static void Add(Bookmark bookmark)
-    {
-        bookmark.Id = nextId++;
-        Bookmarks.Add(bookmark);
-    }
+        public void Delete(int id)
+        {
+            var bookmark = _context.Bookmarks.SingleOrDefault(b => b.Id == id);
+            if (bookmark is null)
+                throw new BookmarkNotFoundException(id);
 
-    public static void Delete(int id)
-    {
-        var bookmark = Get(id);
-        if (bookmark is null)
-            return;
+            _context.Remove(bookmark);
+            _context.SaveChanges();
+        }
 
-        Bookmarks.Remove(bookmark);
-    }
+        public Bookmark Update(int id, Dto.Bookmark bookmark)
+        {
+            var existingBookmark = _context.Bookmarks.SingleOrDefault(p => p.Id == id);
+            if (existingBookmark == null)
+                throw new BookmarkNotFoundException(id);
 
-    public static void Update(Bookmark bookmark)
-    {
-        var index = Bookmarks.FindIndex(p => p.Id == bookmark.Id);
-        if (index == -1)
-            return;
+            existingBookmark.DateModified = DateTime.Now;
 
-        Bookmarks[index] = bookmark;
+            _context.SaveChanges();
+
+            return existingBookmark;
+        }
     }
 }

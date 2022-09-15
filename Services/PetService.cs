@@ -1,53 +1,182 @@
-using bootcamp_api.Models;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Drawing;
+using System.Linq;
+using System.Xml.Linq;
+using Domain;
+using bootcamp_api.Data;
+using bootcamp_api.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
-namespace bootcamp_api.Services;
-
-public static class PetService
+namespace bootcamp_api.Services
 {
-    static List<Pet> Pets { get; }
-    static int nextId = 3;
-    static PetService()
+    public class PetService: IPetService
     {
-        FileLink VetFile = new FileLink { DbPath = "Resources\\Users\\1\\1\\Vet%20Records\\vet-records.pdf" };
-        FileLink PhotoFile = new FileLink { DbPath = "Resources\\Users\\1\\1\\Pet%20Photo\\cat.jpg" };
-        Vaccine[] Vaccine = new Vaccine[] { new Vaccine{ Id = 1, Name = "Rabies", DueDate = DateTime.Now } };
-        Pets = new List<Pet>
+
+        private readonly PawssierContext _context;
+
+        public PetService(PawssierContext context)
+        {
+            _context = context;
+        }
+
+        public Pet[] GetAll()
+        {
+            var pets = _context.Pets;
+
+            return pets.OrderBy(p => p.Id).ToArray();
+        }
+
+        public Pet Get(int id)
+        {
+            var pet = _context.Pets.SingleOrDefault(p => p.Id == id);
+            if (pet == null)
+                throw new PetNotFoundException(id);
+
+            return pet;
+        }
+
+        public Pet Add(Dto.Pet pet)
+        {
+            DateTime now = DateTime.Now;
+
+            Condition[] conditions = new Condition[0];
+            if(pet.Conditions is not null)
             {
-                new Pet { Id = 1, Name = "Cinnamon", Breed = "Rabbit", Color = "Brown",
-                    Description = "Funny guy", Microchip = "12345", Sex = "Female", Fixed = true,
-                    Weight = 3.1, Birthday = DateTime.Now, AdoptionDay = DateTime.Now, VetRecords = VetFile, PetPhoto = PhotoFile },
-                new Pet { Id = 2, Name = "Fruit Loop", Breed = "Rabbit", Color = "Brown",
-                    Description = "Funny guy", Microchip = "12345", Sex = "Female", Fixed = true,
-                    Weight = 3.1, Birthday = DateTime.Now, AdoptionDay = DateTime.Now,
-                    Vaccines = Vaccine }
+                foreach(Dto.Condition c in pet.Conditions)
+                {
+                    var newCondition = new Condition
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        Notes = c.Notes is not null ? c.Notes : ""
+                    };
+                    conditions.Append(newCondition);
+                }
+            }
+            Prescription[] prescriptions = new Prescription[0];
+            if (pet.Prescriptions is not null)
+            {
+                foreach (Dto.Prescription p in pet.Prescriptions)
+                {
+                    var newPrescription = new Prescription
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Doctor = p.Doctor,
+                        Due = p.Due,
+                        Refills = p.Refills
+                    };
+                    prescriptions.Append(newPrescription);
+                }
+            }
+            Vaccine[] vaccines = new Vaccine[0];
+            if (pet.Vaccines is not null)
+            {
+                foreach (Dto.Vaccine p in pet.Vaccines)
+                {
+                    var newVaccine = new Vaccine
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        DateAdministered = p.DateAdministered,
+                        DueDate = p.DueDate
+                    };
+                    vaccines.Append(newVaccine);
+                }
+            }
+            FileLink petPhoto = new FileLink
+            {
+                DbPath = pet.PetPhoto is not null ? pet.PetPhoto.DbPath : ""
             };
-    }
+            FileLink vetRecords = new FileLink
+            {
+                DbPath = pet.VetRecords is not null ? pet.VetRecords.DbPath : ""
+            };
+            var newPet = new Pet
+            {
+                Id = pet.Id,
+                AdoptionDay = pet.AdoptionDay,
+                Breed = pet.Breed,
+                Birthday = pet.Birthday,
+                Color = pet.Color,
+                Conditions = conditions,
+                Description = pet.Description,
+                Fixed = pet.Fixed,
+                Microchip = pet.Microchip,
+                Name = pet.Name,
+                PetPhoto = pet.PetPhoto is null ? petPhoto : null,
+                Prescriptions = prescriptions,
+                Sex = pet.Sex,
+                Vaccines = vaccines,
+                VetRecords = pet.VetRecords is null ? vetRecords : null,
+                Weight = pet.Weight
+            };
 
-    public static List<Pet> GetAll() => Pets;
+            _context.Pets.Add(newPet);
+            _context.SaveChanges();
 
-    public static Pet? Get(int id) => Pets.FirstOrDefault(p => p.Id == id);
+            return newPet;
+        }
 
-    public static void Add(Pet pet)
-    {
-        pet.Id = nextId++;
-        Pets.Add(pet);
-    }
+        public void Delete(int id)
+        {
+            var pet = _context.Pets.SingleOrDefault(p => p.Id == id);
+            if (pet is null)
+                throw new PetNotFoundException(id);
 
-    public static void Delete(int id)
-    {
-        var pet = Get(id);
-        if (pet is null)
-            return;
+            _context.Remove(pet);
+            _context.SaveChanges();
+        }
 
-        Pets.Remove(pet);
-    }
+        public Pet Update(int id, Dto.Pet pet)
+        {
+            var existingPet = _context.Pets.SingleOrDefault(p => p.Id == id);
+            if (existingPet == null)
+                throw new PetNotFoundException(id);
+            /*
+            existingPet.DateModified = DateTime.Now;
+            existingPet.AdoptionDay = pet.AdoptionDay;
+            existingPet.Breed = pet.Breed;
+            existingPet.Birthday = pet.Birthday;
+            existingPet.Color = pet.Color;
+            existingPet.Conditions = pet.Conditions;
+            existingPet.Description = pet.Description;
+            existingPet.Fixed = pet.Fixed;
+            existingPet.Microchip = pet.Microchip;
+            existingPet.Name = pet.Name;
+            existingPet.PetPhoto = pet.PetPhoto;
+            existingPet.Prescriptions = pet.Prescriptions;
+            existingPet.Sex = pet.Sex;
+            existingPet.Vaccines = pet.Vaccines;
+            existingPet.VetRecords = pet.VetRecords;
+            existingPet.Weight = pet.Weight;
+            
+            _context.SaveChanges();
+*/
+            return existingPet;
+        }
 
-    public static void Update(Pet pet)
-    {
-        var index = Pets.FindIndex(p => p.Id == pet.Id);
-        if (index == -1)
-            return;
-
-        Pets[index] = pet;
+        /*private static mapConditions(Condition[] c)
+        {
+            if(c is null)
+            {
+                return null;
+            }
+            Condition[] conditions = new Condition[c];
+            foreach(Dto.Condition c in pet.Conditions)
+            {
+                var newCondition = new Condition
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Notes = c.Notes is not null ? c.Notes : "",
+                    DateAdded = now,
+                    DateModified = now
+                };
+                conditions.Append(newCondition);
+            }
+        } */
     }
 }
