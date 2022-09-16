@@ -37,6 +37,9 @@ namespace bootcamp_api.Services
 
         public Bookmark Add(Dto.Bookmark bookmark)
         {
+            var dupe = _context.Bookmarks.SingleOrDefault(b => b.Petfinder_Id == bookmark.Petfinder_Id);
+            if (dupe is not null)
+                throw new DuplicateBookmarkException(bookmark.Petfinder_Id);
 
             DateTime now = DateTime.Now;
             var newBookmark = new Bookmark
@@ -69,10 +72,18 @@ namespace bootcamp_api.Services
 
         public Bookmark Update(int id, Dto.Bookmark bookmark)
         {
+            if (id != bookmark.Id)
+                throw new Exception();
+
             var existingBookmark = _context.Bookmarks.SingleOrDefault(p => p.Id == id);
             if (existingBookmark == null)
                 throw new BookmarkNotFoundException(id);
 
+            existingBookmark.Note = bookmark.Note;
+            existingBookmark.External_Url = bookmark.External_Url;
+            existingBookmark.Petfinder_Id = bookmark.Petfinder_Id;
+            existingBookmark.Link = bookmark.Link;
+            existingBookmark.Title = bookmark.Title;
             existingBookmark.DateModified = DateTime.Now;
 
             _context.SaveChanges();

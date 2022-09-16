@@ -23,7 +23,12 @@ namespace bootcamp_api.Services
 
         public Pet[] GetAll()
         {
-            var pets = _context.Pets;
+            var pets = _context.Pets
+                .Include(p => p.Conditions)
+                .Include(p => p.Vaccines)
+                .Include(p => p.Prescriptions)
+                .Include(p => p.PetPhoto)
+                .Include(p => p.VetRecords);
 
             return pets.OrderBy(p => p.Id).ToArray();
         }
@@ -41,78 +46,62 @@ namespace bootcamp_api.Services
         {
             DateTime now = DateTime.Now;
 
-            Condition[] conditions = new Condition[0];
-            if(pet.Conditions is not null)
-            {
-                foreach(Dto.Condition c in pet.Conditions)
-                {
-                    var newCondition = new Condition
-                    {
-                        Id = c.Id,
-                        Name = c.Name,
-                        Notes = c.Notes is not null ? c.Notes : ""
-                    };
-                    conditions.Append(newCondition);
-                }
-            }
-            Prescription[] prescriptions = new Prescription[0];
-            if (pet.Prescriptions is not null)
-            {
-                foreach (Dto.Prescription p in pet.Prescriptions)
-                {
-                    var newPrescription = new Prescription
-                    {
-                        Id = p.Id,
-                        Name = p.Name,
-                        Doctor = p.Doctor,
-                        Due = p.Due,
-                        Refills = p.Refills
-                    };
-                    prescriptions.Append(newPrescription);
-                }
-            }
-            Vaccine[] vaccines = new Vaccine[0];
-            if (pet.Vaccines is not null)
-            {
-                foreach (Dto.Vaccine p in pet.Vaccines)
-                {
-                    var newVaccine = new Vaccine
-                    {
-                        Id = p.Id,
-                        Name = p.Name,
-                        DateAdministered = p.DateAdministered,
-                        DueDate = p.DueDate
-                    };
-                    vaccines.Append(newVaccine);
-                }
-            }
-            FileLink petPhoto = new FileLink
-            {
-                DbPath = pet.PetPhoto is not null ? pet.PetPhoto.DbPath : ""
-            };
-            FileLink vetRecords = new FileLink
-            {
-                DbPath = pet.VetRecords is not null ? pet.VetRecords.DbPath : ""
-            };
             var newPet = new Pet
             {
-                Id = pet.Id,
                 AdoptionDay = pet.AdoptionDay,
                 Breed = pet.Breed,
                 Birthday = pet.Birthday,
                 Color = pet.Color,
-                Conditions = conditions,
                 Description = pet.Description,
                 Fixed = pet.Fixed,
                 Microchip = pet.Microchip,
                 Name = pet.Name,
-                PetPhoto = pet.PetPhoto is null ? petPhoto : null,
-                Prescriptions = prescriptions,
                 Sex = pet.Sex,
-                Vaccines = vaccines,
-                VetRecords = pet.VetRecords is null ? vetRecords : null,
-                Weight = pet.Weight
+                Weight = pet.Weight,
+                DateAdded = now,
+                DateModified = now
+
             };
+
+            foreach(Dto.Condition c in pet.Conditions)
+            {
+                newPet.Conditions.Add(new Condition
+                {
+                    Name = c.Name,
+                    Notes = c.Notes
+                });
+            }
+
+            foreach (Dto.Prescription p in pet.Prescriptions)
+            {
+                newPet.Prescriptions.Add(new Prescription
+                {
+                    Name = p.Name,
+                    Doctor = p.Doctor,
+                    Due = p.Due,
+                    Refills = p.Refills
+                });
+            }
+
+            foreach (Dto.Vaccine p in pet.Vaccines)
+            {
+                newPet.Vaccines.Add(new Vaccine
+                {
+                    Name = p.Name,
+                    DateAdministered = p.DateAdministered,
+                    DueDate = p.DueDate
+                });
+            }
+            if(pet.PetPhoto is not null && pet.PetPhoto.DbPath is not null)
+                newPet.PetPhoto = new FileLink
+                {
+                    DbPath = pet.PetPhoto.DbPath
+                };
+            if (pet.VetRecords is not null && pet.VetRecords.DbPath is not null)
+                newPet.VetRecords = new FileLink
+                {
+                    DbPath = pet.VetRecords.DbPath
+                };
 
             _context.Pets.Add(newPet);
             _context.SaveChanges();
@@ -135,48 +124,35 @@ namespace bootcamp_api.Services
             var existingPet = _context.Pets.SingleOrDefault(p => p.Id == id);
             if (existingPet == null)
                 throw new PetNotFoundException(id);
-            /*
-            existingPet.DateModified = DateTime.Now;
+
             existingPet.AdoptionDay = pet.AdoptionDay;
             existingPet.Breed = pet.Breed;
             existingPet.Birthday = pet.Birthday;
             existingPet.Color = pet.Color;
-            existingPet.Conditions = pet.Conditions;
             existingPet.Description = pet.Description;
             existingPet.Fixed = pet.Fixed;
             existingPet.Microchip = pet.Microchip;
             existingPet.Name = pet.Name;
-            existingPet.PetPhoto = pet.PetPhoto;
-            existingPet.Prescriptions = pet.Prescriptions;
             existingPet.Sex = pet.Sex;
-            existingPet.Vaccines = pet.Vaccines;
-            existingPet.VetRecords = pet.VetRecords;
             existingPet.Weight = pet.Weight;
-            
+            existingPet.DateModified = DateTime.Now;
+
+            if (pet.PetPhoto is not null && pet.PetPhoto.DbPath is not null)
+                existingPet.PetPhoto = new FileLink
+                {
+                    DbPath = pet.PetPhoto.DbPath
+                };
+            if (pet.VetRecords is not null && pet.VetRecords.DbPath is not null)
+                existingPet.VetRecords = new FileLink
+                {
+                    DbPath = pet.VetRecords.DbPath
+                };
+
+            //Update conditions, prescriptions, vaccines
+
             _context.SaveChanges();
-*/
+
             return existingPet;
         }
-
-        /*private static mapConditions(Condition[] c)
-        {
-            if(c is null)
-            {
-                return null;
-            }
-            Condition[] conditions = new Condition[c];
-            foreach(Dto.Condition c in pet.Conditions)
-            {
-                var newCondition = new Condition
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Notes = c.Notes is not null ? c.Notes : "",
-                    DateAdded = now,
-                    DateModified = now
-                };
-                conditions.Append(newCondition);
-            }
-        } */
     }
 }

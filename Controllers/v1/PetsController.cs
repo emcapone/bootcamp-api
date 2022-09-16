@@ -49,7 +49,7 @@ namespace bootcamp_api.Controllers
         /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(Pet), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(PetNotFoundException), StatusCodes.Status404NotFound)]
         public IActionResult Get(int id)
         {
             try
@@ -75,11 +75,10 @@ namespace bootcamp_api.Controllers
             try
             {
                 var createdPet = _petService.Add(pet);
-                var location = Url.RouteUrl(new { Action = "Get", Controller = "Post", id = pet.Id });
 
                 var dto = _mapper.Map<Domain.Pet, Pet>(createdPet);
 
-                return new CreatedResult(location, dto);
+                return CreatedAtAction(nameof(Create), new { id = createdPet.Id }, createdPet);
             }
             catch (Exception)
             {
@@ -104,6 +103,10 @@ namespace bootcamp_api.Controllers
 
                 return new OkObjectResult(dto);
             }
+            catch (PetNotFoundException)
+            {
+                return new NotFoundResult();
+            }
             catch (Exception)
             {
                 return new BadRequestResult();
@@ -123,6 +126,10 @@ namespace bootcamp_api.Controllers
             {
                 _petService.Delete(id);
                 return new NoContentResult();
+            }
+            catch (PetNotFoundException)
+            {
+                return new NotFoundResult();
             }
             catch (Exception)
             {

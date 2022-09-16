@@ -73,11 +73,10 @@ namespace bootcamp_api.Controllers
             try
             {
                 var createdBookmark = _bookmarkService.Add(bookmark);
-                var location = Url.RouteUrl(new { Action = "Get", Controller = "Post", id = bookmark.Id });
 
                 var dto = _mapper.Map<Domain.Bookmark, Bookmark>(createdBookmark);
 
-                return new CreatedResult(location, dto);
+                return CreatedAtAction(nameof(Create), new { id = createdBookmark.Id }, createdBookmark);
             }
             catch (DuplicateBookmarkException e)
             {
@@ -105,6 +104,10 @@ namespace bootcamp_api.Controllers
 
                 return new OkObjectResult(dto);
             }
+            catch (BookmarkNotFoundException)
+            {
+                return new NotFoundResult();
+            }
             catch (Exception)
             {
                 return new BadRequestResult();
@@ -124,6 +127,10 @@ namespace bootcamp_api.Controllers
             {
                 _bookmarkService.Delete(id);
                 return new NoContentResult();
+            }
+            catch (BookmarkNotFoundException)
+            {
+                return new NotFoundResult();
             }
             catch (Exception)
             {

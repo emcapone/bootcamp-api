@@ -58,12 +58,12 @@ namespace bootcamp_api.Controllers
                 }
                 else
                 {
-                    return BadRequest();
+                    throw new Exception();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, "Internal server error");
+                return new BadRequestResult();
             }
         }
 

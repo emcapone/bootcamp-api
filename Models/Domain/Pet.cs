@@ -25,9 +25,9 @@ namespace Domain
         public DateTime? AdoptionDay { get; set; }
         public FileLink? VetRecords { get; set; }
         public FileLink? PetPhoto { get; set; }
-        public Prescription[]? Prescriptions { get; set; }
-        public Vaccine[]? Vaccines { get; set; }
-        public Condition[]? Conditions { get; set; }
+        public List<Prescription> Prescriptions { get; set; } = new List<Prescription>();
+        public List<Vaccine> Vaccines { get; set; } = new List<Vaccine>();
+        public List<Condition> Conditions { get; set; } = new List<Condition>();
         public DateTime? DateAdded { get; set; }
         public DateTime? DateModified { get; set; }
     }
