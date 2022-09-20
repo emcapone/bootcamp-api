@@ -49,7 +49,7 @@ namespace bootcamp_api.Controllers
         /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(Pet), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(PetNotFoundException), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public IActionResult Get(int id)
         {
             try

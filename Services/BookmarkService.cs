@@ -49,7 +49,7 @@ namespace bootcamp_api.Services
                 Link = bookmark.Link,
                 Title = bookmark.Title,
                 Note = bookmark.Note,
-                SavedAt = bookmark.SavedAt is null ? now : bookmark.SavedAt,
+                SavedAt = bookmark.SavedAt ?? now,
                 Petfinder_Id = bookmark.Petfinder_Id,
                 DateModified = now
             };

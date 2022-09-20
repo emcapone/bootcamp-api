@@ -25,7 +25,6 @@ namespace Dto
 
     public class Prescription
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Doctor { get; set; } = string.Empty;
         public DateTime Due { get; set; }
@@ -34,7 +33,6 @@ namespace Dto
 
     public class Vaccine
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public DateTime DateAdministered { get; set; }
         public DateTime DueDate { get; set; }
@@ -42,7 +40,6 @@ namespace Dto
 
     public class Condition
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string? Notes { get; set; } = string.Empty;
     }
