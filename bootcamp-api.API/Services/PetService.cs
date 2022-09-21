@@ -134,8 +134,10 @@ namespace bootcamp_api.Services
             _context.Conditions.RemoveRange(pet.Conditions);
             _context.Vaccines.RemoveRange(pet.Vaccines);
             _context.Prescriptions.RemoveRange(pet.Prescriptions);
-            _context.FileLinks.Remove(pet.PetPhoto);
-            _context.FileLinks.Remove(pet.VetRecords);
+            if(pet.PetPhoto is not null)
+                _context.FileLinks.Remove(pet.PetPhoto);
+            if(pet.VetRecords is not null)
+                _context.FileLinks.Remove(pet.VetRecords);
 
             _context.Remove(pet);
             _context.SaveChanges();
