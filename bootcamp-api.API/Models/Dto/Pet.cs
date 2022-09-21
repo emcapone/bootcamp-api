@@ -18,7 +18,7 @@ namespace Dto
         public DateTime? AdoptionDay { get; set; }
         public FileLink? VetRecords { get; set; }
         public FileLink? PetPhoto { get; set; }
-        public List<Prescription>? Prescriptions { get; set; }
+        public Prescription[]? Prescriptions { get; set; }
         public Vaccine[] Vaccines { get; set; } = new Vaccine[0];
         public Condition[] Conditions { get; set; } = new Condition[0];
     }
