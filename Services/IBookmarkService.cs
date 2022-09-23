@@ -1,13 +1,14 @@
 using System;
+using Dto;
 
 namespace bootcamp_api.Services
 {
     public interface IBookmarkService
     {
-        Domain.Bookmark[] GetAll();
-        Domain.Bookmark Get(int id);
-        Domain.Bookmark Add(Dto.Bookmark bookmark);
+        Bookmark[] GetAll(int user_id);
+        Bookmark Get(int id);
+        Bookmark Add(int user_id, Bookmark bookmark);
         void Delete(int id);
-        Domain.Bookmark Update(int id, Dto.Bookmark bookmark);
+        Bookmark Update(int id, Bookmark bookmark);
     }
 }

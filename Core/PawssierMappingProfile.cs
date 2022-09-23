@@ -15,6 +15,10 @@ namespace bootcamp_api.Core
             CreateMap<FileLink, Dto.FileLink>();
             CreateMap<Bookmark, Dto.Bookmark>();
             CreateMap<User, Dto.User>();
+            CreateMap<Pet, Dto.PetListItem>()
+                .ForMember(item => item.VaccinesCount, options => options.MapFrom(pet => pet.Vaccines.Count()))
+                .ForMember(item => item.PrescriptionsCount, options => options.MapFrom(pet => pet.Prescriptions.Count()))
+                .ForMember(item => item.ConditionsCount, options => options.MapFrom(pet => pet.Conditions.Count()));
         }
     }
 }

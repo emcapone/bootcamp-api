@@ -5,11 +5,13 @@ namespace Domain
 {
     public class Bookmark
     {
+        [Key]
         public int Id { get; set; }
+        public int User_id { get; set; }
         [Required]
-        public string Link { get; set; } = string.Empty;
+        public string Petfinder_link { get; set; } = string.Empty;
         [Required]
-        public int Petfinder_Id { get; set; }
+        public int Petfinder_id { get; set; }
         [Required]
         public string Title { get; set; } = string.Empty;
         [Required]
@@ -17,7 +19,7 @@ namespace Domain
         [Required]
         public DateTime? SavedAt { get; set; }
         [Required]
-        public string External_Url { get; set; } = string.Empty;
+        public string External_url { get; set; } = string.Empty;
 
         public DateTime? DateModified { get; set; }
     }

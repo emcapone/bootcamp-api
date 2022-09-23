@@ -5,7 +5,9 @@ namespace Domain
 {
     public class Pet
     {
+        [Key]
         public int Id { get; set; }
+        public int User_id { get; set; }
         [Required]
         public string Name { get; set; } = string.Empty;
         [Required]
