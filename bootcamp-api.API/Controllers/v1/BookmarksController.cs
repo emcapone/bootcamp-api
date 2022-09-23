@@ -30,7 +30,7 @@ namespace bootcamp_api.Controllers
         /// <summary>
         /// Returns all of a user's bookmarks
         /// </summary>
-        [HttpGet("{user_id}")]
+        [HttpGet("GetAll/{user_id}")]
         [ProducesResponseType(typeof(Bookmark[]), StatusCodes.Status200OK)]
         public IActionResult GetAll(int user_id)
         {
