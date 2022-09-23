@@ -27,24 +27,27 @@ namespace bootcamp_api.Services
 
         public Dto.PetListItem[] GetAll(ApiVersion version, int user_id)
         {
-            var pets = _context.Pets
-                .Include(p => p.Conditions)
-                .Include(p => p.Vaccines)
-                .Include(p => p.Prescriptions)
-                .Include(p => p.PetPhoto)
-                .Include(p => p.VetRecords)
-                .Where(p => p.User_id == user_id);
+            var pets = _context.Pets.Where(p => p.User_id == user_id).Select(p => new Dto.PetListItem()
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Breed = p.Breed,
+                Microchip = p.Microchip,
+                Sex = p.Sex,
+                Birthday = p.Birthday,
+                AdoptionDay = p.AdoptionDay,
+                PetPhoto = new Dto.FileLink { DbPath = p.PetPhoto.DbPath },
+                PrescriptionsCount = p.Prescriptions.Count(),
+                VaccinesCount = p.Vaccines.Count(),
+                ConditionsCount = p.Conditions.Count()
+            }).OrderBy(p => p.Id).ToArray();
 
-            var petAry = pets.OrderBy(p => p.Id).ToArray();
-
-            var petListItems = _mapper.Map<Pet[], Dto.PetListItem[]>(petAry);
-
-            foreach(Dto.PetListItem x in petListItems)
+            foreach(Dto.PetListItem x in pets)
             {
                 x.Link = LinkService.GenerateLocalLink(version, x.Id); 
             }
 
-            return petListItems;
+            return pets;
         }
 
         public Dto.Pet Get(ApiVersion version, int id)
