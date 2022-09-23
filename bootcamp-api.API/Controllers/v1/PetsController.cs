@@ -1,7 +1,6 @@
 using bootcamp_api.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
 using bootcamp_api.Services;
 using Microsoft.Extensions.Hosting;
 using Dto;
@@ -22,41 +21,36 @@ namespace bootcamp_api.Controllers
     {
 
         private readonly IPetService _petService;
-        private readonly IMapper _mapper;
 
         /// <summary>
         /// PetsController constructor
         /// </summary>
-        public PetsController(IPetService petService, IMapper mapper)
+        public PetsController(IPetService petService)
         {
             _petService = petService;
-            _mapper = mapper;
         }
 
         /// <summary>
-        /// Returns all pets
+        /// Returns summary details for all of the user's pets
         /// </summary>
-        [HttpGet]
-        [ProducesResponseType(typeof(Pet[]), StatusCodes.Status200OK)]
-        public IActionResult GetAll()
+        [HttpGet("GetAll/{user_id}")]
+        [ProducesResponseType(typeof(PetListItem[]), StatusCodes.Status200OK)]
+        public IActionResult GetAll(ApiVersion version, int user_id)
         {
-            var pets = _petService.GetAll();
-            var dtos = _mapper.Map<Domain.Pet[], Pet[]>(pets);
-            return new OkObjectResult(dtos);
+            return new OkObjectResult(_petService.GetAll(version, user_id));
         }
+
         /// <summary>
         /// Returns a pet with a given id
         /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(Pet), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public IActionResult Get(int id)
+        public IActionResult Get(ApiVersion version, int id)
         {
             try
             {
-                var pet = _petService.Get(id);
-                var dto = _mapper.Map<Domain.Pet, Pet>(pet);
-                return new ObjectResult(dto);
+                return new ObjectResult(_petService.Get(version, id));
             }
             catch (PetNotFoundException)
             {
@@ -67,17 +61,14 @@ namespace bootcamp_api.Controllers
         /// <summary>
         /// Creates a new pet
         /// </summary>
-        [HttpPost]
+        [HttpPost("{user_id}")]
         [ProducesResponseType(typeof(Pet), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public IActionResult Create(Pet pet)
+        public IActionResult Create(ApiVersion version, int user_id, Pet pet)
         {
             try
             {
-                var createdPet = _petService.Add(pet);
-
-                var dto = _mapper.Map<Domain.Pet, Pet>(createdPet);
-
+                var createdPet = _petService.Add(version, user_id, pet);
                 return CreatedAtAction(nameof(Create), new { id = createdPet.Id }, createdPet);
             }
             catch (Exception)
@@ -94,14 +85,11 @@ namespace bootcamp_api.Controllers
         [ProducesResponseType(typeof(Pet), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public IActionResult Update(int id, Pet pet)
+        public IActionResult Update(ApiVersion version, int id, Pet pet)
         {
             try
             {
-                var editedPet = _petService.Update(id, pet);
-                var dto = _mapper.Map<Domain.Pet, Pet>(editedPet);
-
-                return new OkObjectResult(dto);
+                return new OkObjectResult(_petService.Update(version, id, pet));
             }
             catch (PetNotFoundException)
             {

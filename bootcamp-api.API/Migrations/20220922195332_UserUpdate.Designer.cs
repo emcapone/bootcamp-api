@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using bootcamp_api.Data;
 
@@ -11,9 +12,10 @@ using bootcamp_api.Data;
 namespace bootcamp_api.Migrations
 {
     [DbContext(typeof(PawssierContext))]
-    partial class PawssierContextModelSnapshot : ModelSnapshot
+    [Migration("20220922195332_UserUpdate")]
+    partial class UserUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,6 +45,10 @@ namespace bootcamp_api.Migrations
 
                     b.Property<int>("Petfinder_id")
                         .HasColumnType("int");
+
+                    b.Property<string>("Petfinder_link")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("SavedAt")
                         .IsRequired()

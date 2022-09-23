@@ -1,13 +1,15 @@
 using System;
+using Dto;
+using Microsoft.AspNetCore.Mvc;
 
 namespace bootcamp_api.Services
 {
     public interface IBookmarkService
     {
-        Domain.Bookmark[] GetAll();
-        Domain.Bookmark Get(int id);
-        Domain.Bookmark Add(Dto.Bookmark bookmark);
+        Bookmark[] GetAll(ApiVersion version, int user_id, int pf_version);
+        Bookmark Get(ApiVersion version, int id, int pf_version);
+        Bookmark Add(ApiVersion version, int user_id, int pf_version, Bookmark bookmark);
         void Delete(int id);
-        Domain.Bookmark Update(int id, Dto.Bookmark bookmark);
+        Bookmark Update(ApiVersion version, int id, int pf_version, Bookmark bookmark);
     }
 }

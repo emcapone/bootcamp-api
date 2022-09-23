@@ -8,6 +8,8 @@ using Domain;
 using bootcamp_api.Data;
 using bootcamp_api.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
 
 namespace bootcamp_api.Services
 {
@@ -15,25 +17,40 @@ namespace bootcamp_api.Services
     {
 
         private readonly PawssierContext _context;
+        private readonly IMapper _mapper;
 
-        public PetService(PawssierContext context)
+        public PetService(PawssierContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public Pet[] GetAll()
+        public Dto.PetListItem[] GetAll(ApiVersion version, int user_id)
         {
-            var pets = _context.Pets
-                .Include(p => p.Conditions)
-                .Include(p => p.Vaccines)
-                .Include(p => p.Prescriptions)
-                .Include(p => p.PetPhoto)
-                .Include(p => p.VetRecords);
+            var pets = _context.Pets.Where(p => p.User_id == user_id).Select(p => new Dto.PetListItem()
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Breed = p.Breed,
+                Microchip = p.Microchip,
+                Sex = p.Sex,
+                Birthday = p.Birthday,
+                AdoptionDay = p.AdoptionDay,
+                PetPhoto = new Dto.FileLink { DbPath = p.PetPhoto.DbPath },
+                PrescriptionsCount = p.Prescriptions.Count(),
+                VaccinesCount = p.Vaccines.Count(),
+                ConditionsCount = p.Conditions.Count()
+            }).OrderBy(p => p.Id).ToArray();
 
-            return pets.OrderBy(p => p.Id).ToArray();
+            foreach(Dto.PetListItem x in pets)
+            {
+                x.Link = LinkService.GeneratePetsLink(version, x.Id); 
+            }
+
+            return pets;
         }
 
-        public Pet Get(int id)
+        public Dto.Pet Get(ApiVersion version, int id)
         {
             var pet = _context.Pets
                 .Include(p => p.Conditions)
@@ -46,10 +63,12 @@ namespace bootcamp_api.Services
             if (pet == null)
                 throw new PetNotFoundException(id);
 
-            return pet;
+            var dto = _mapper.Map<Pet, Dto.Pet>(pet);
+            dto.Link = LinkService.GeneratePetsLink(version, dto.Id);
+            return dto;
         }
 
-        public Pet Add(Dto.Pet pet)
+        public Dto.Pet Add(ApiVersion version, int user_id, Dto.Pet pet)
         {
             DateTime now = DateTime.Now;
 
@@ -66,39 +85,42 @@ namespace bootcamp_api.Services
                 Sex = pet.Sex,
                 Weight = pet.Weight,
                 DateAdded = now,
-                DateModified = now
-
+                DateModified = now,
+                User_id = user_id
             };
 
-            foreach(Dto.Condition c in pet.Conditions)
-            {
-                newPet.Conditions.Add(new Condition
+            if(pet.Conditions is not null)
+                foreach(Dto.Condition c in pet.Conditions)
                 {
-                    Name = c.Name,
-                    Notes = c.Notes
-                });
-            }
+                    newPet.Conditions.Add(new Condition
+                    {
+                        Name = c.Name,
+                        Notes = c.Notes
+                    });
+                }
 
-            foreach (Dto.Prescription p in pet.Prescriptions)
-            {
-                newPet.Prescriptions.Add(new Prescription
+            if(pet.Prescriptions is not null)
+                foreach (Dto.Prescription p in pet.Prescriptions)
                 {
-                    Name = p.Name,
-                    Doctor = p.Doctor,
-                    Due = p.Due,
-                    Refills = p.Refills
-                });
-            }
+                    newPet.Prescriptions.Add(new Prescription
+                    {
+                        Name = p.Name,
+                        Doctor = p.Doctor,
+                        Due = p.Due,
+                        Refills = p.Refills
+                    });
+                }
 
-            foreach (Dto.Vaccine p in pet.Vaccines)
-            {
-                newPet.Vaccines.Add(new Vaccine
+            if(pet.Vaccines is not null)
+                foreach (Dto.Vaccine p in pet.Vaccines)
                 {
-                    Name = p.Name,
-                    DateAdministered = p.DateAdministered,
-                    DueDate = p.DueDate
-                });
-            }
+                    newPet.Vaccines.Add(new Vaccine
+                    {
+                        Name = p.Name,
+                        DateAdministered = p.DateAdministered,
+                        DueDate = p.DueDate
+                    });
+                }
 
             if(pet.PetPhoto is not null && pet.PetPhoto.DbPath is not null)
                 newPet.PetPhoto = new FileLink
@@ -115,7 +137,9 @@ namespace bootcamp_api.Services
             _context.Pets.Add(newPet);
             _context.SaveChanges();
 
-            return newPet;
+            var dto = _mapper.Map<Pet, Dto.Pet>(newPet);
+            dto.Link = LinkService.GeneratePetsLink(version, dto.Id);
+            return dto;
         }
 
         public void Delete(int id)
@@ -143,7 +167,7 @@ namespace bootcamp_api.Services
             _context.SaveChanges();
         }
 
-        public Pet Update(int id, Dto.Pet pet)
+        public Dto.Pet Update(ApiVersion version, int id, Dto.Pet pet)
         {
             if (id != pet.Id)
                 throw new Exception();
@@ -235,7 +259,9 @@ namespace bootcamp_api.Services
 
             _context.SaveChanges();
 
-            return existingPet;
+            var dto = _mapper.Map<Pet, Dto.Pet>(existingPet);
+            dto.Link = LinkService.GeneratePetsLink(version, dto.Id);
+            return dto;
         }
     }
 }

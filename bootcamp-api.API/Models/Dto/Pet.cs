@@ -21,6 +21,7 @@ namespace Dto
         public Prescription[]? Prescriptions { get; set; }
         public Vaccine[] Vaccines { get; set; } = new Vaccine[0];
         public Condition[] Conditions { get; set; } = new Condition[0];
+        public string Link { get; set; } = string.Empty;
     }
 
     public class Prescription
