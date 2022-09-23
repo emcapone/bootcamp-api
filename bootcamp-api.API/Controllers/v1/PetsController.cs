@@ -46,11 +46,11 @@ namespace bootcamp_api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(Pet), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public IActionResult Get(int id)
+        public IActionResult Get(ApiVersion version, int id)
         {
             try
             {
-                return new ObjectResult(_petService.Get(id));
+                return new ObjectResult(_petService.Get(version, id));
             }
             catch (PetNotFoundException)
             {
@@ -64,11 +64,11 @@ namespace bootcamp_api.Controllers
         [HttpPost("{user_id}")]
         [ProducesResponseType(typeof(Pet), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public IActionResult Create(int user_id, Pet pet)
+        public IActionResult Create(ApiVersion version, int user_id, Pet pet)
         {
             try
             {
-                var createdPet = _petService.Add(user_id, pet);
+                var createdPet = _petService.Add(version, user_id, pet);
                 return CreatedAtAction(nameof(Create), new { id = createdPet.Id }, createdPet);
             }
             catch (Exception)
@@ -85,11 +85,11 @@ namespace bootcamp_api.Controllers
         [ProducesResponseType(typeof(Pet), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public IActionResult Update(int id, Pet pet)
+        public IActionResult Update(ApiVersion version, int id, Pet pet)
         {
             try
             {
-                return new OkObjectResult(_petService.Update(id, pet));
+                return new OkObjectResult(_petService.Update(version, id, pet));
             }
             catch (PetNotFoundException)
             {

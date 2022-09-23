@@ -41,13 +41,13 @@ namespace bootcamp_api.Services
 
             foreach(Dto.PetListItem x in petListItems)
             {
-                x.Link = "/api/v" + version + "/Pets/" + x.Id;
+                x.Link = LinkService.GenerateLocalLink(version, x.Id); 
             }
 
             return petListItems;
         }
 
-        public Dto.Pet Get(int id)
+        public Dto.Pet Get(ApiVersion version, int id)
         {
             var pet = _context.Pets
                 .Include(p => p.Conditions)
@@ -60,10 +60,12 @@ namespace bootcamp_api.Services
             if (pet == null)
                 throw new PetNotFoundException(id);
 
-            return _mapper.Map<Pet, Dto.Pet>(pet);
+            var dto = _mapper.Map<Pet, Dto.Pet>(pet);
+            dto.Link = LinkService.GenerateLocalLink(version, dto.Id);
+            return dto;
         }
 
-        public Dto.Pet Add(int user_id, Dto.Pet pet)
+        public Dto.Pet Add(ApiVersion version, int user_id, Dto.Pet pet)
         {
             DateTime now = DateTime.Now;
 
@@ -132,7 +134,9 @@ namespace bootcamp_api.Services
             _context.Pets.Add(newPet);
             _context.SaveChanges();
 
-            return _mapper.Map<Pet, Dto.Pet>(newPet);
+            var dto = _mapper.Map<Pet, Dto.Pet>(newPet);
+            dto.Link = LinkService.GenerateLocalLink(version, dto.Id);
+            return dto;
         }
 
         public void Delete(int id)
@@ -160,7 +164,7 @@ namespace bootcamp_api.Services
             _context.SaveChanges();
         }
 
-        public Dto.Pet Update(int id, Dto.Pet pet)
+        public Dto.Pet Update(ApiVersion version, int id, Dto.Pet pet)
         {
             if (id != pet.Id)
                 throw new Exception();
@@ -252,7 +256,9 @@ namespace bootcamp_api.Services
 
             _context.SaveChanges();
 
-            return _mapper.Map<Pet, Dto.Pet>(existingPet);
+            var dto = _mapper.Map<Pet, Dto.Pet>(existingPet);
+            dto.Link = LinkService.GenerateLocalLink(version, dto.Id);
+            return dto;
         }
     }
 }

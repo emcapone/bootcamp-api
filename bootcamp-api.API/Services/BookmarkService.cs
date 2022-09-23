@@ -23,23 +23,30 @@ namespace bootcamp_api.Services
             _context = context;
         }
 
-        public Dto.Bookmark[] GetAll(int user_id)
+        public Dto.Bookmark[] GetAll(int user_id, int api_version)
         {
             var bookmarks = _context.Bookmarks.Where(b => b.User_id == user_id);
             var bookmarkAry = bookmarks.OrderBy(b => b.Id).ToArray();
-            return _mapper.Map<Bookmark[], Dto.Bookmark[]>(bookmarkAry);
+            var dtos = _mapper.Map<Bookmark[], Dto.Bookmark[]>(bookmarkAry);
+            foreach(Dto.Bookmark x in dtos)
+            {
+                x.Petfinder_link = LinkService.GeneratePetfinderLink(api_version, x.Id);
+            }
+            return dtos;
         }
 
-        public Dto.Bookmark Get(int id)
+        public Dto.Bookmark Get(int id, int api_version)
         {
             var bookmark = _context.Bookmarks.SingleOrDefault(b => b.Id == id);
             if (bookmark == null)
                 throw new BookmarkNotFoundException(id);
 
-            return _mapper.Map<Bookmark, Dto.Bookmark>(bookmark);
+            var dto = _mapper.Map<Bookmark, Dto.Bookmark>(bookmark);
+            dto.Petfinder_link = LinkService.GeneratePetfinderLink(api_version, dto.Id);
+            return dto;
         }
 
-        public Dto.Bookmark Add(int user_id, Dto.Bookmark bookmark)
+        public Dto.Bookmark Add(int user_id, int api_version, Dto.Bookmark bookmark)
         {
             var dupe = _context.Bookmarks.SingleOrDefault(b => b.Petfinder_id == bookmark.Petfinder_id);
             if (dupe is not null)
@@ -50,7 +57,6 @@ namespace bootcamp_api.Services
             {
                 Id = bookmark.Id,
                 External_url = bookmark.External_url,
-                Petfinder_link = bookmark.Petfinder_link,
                 Title = bookmark.Title,
                 Note = bookmark.Note,
                 SavedAt = bookmark.SavedAt ?? now,
@@ -62,7 +68,9 @@ namespace bootcamp_api.Services
             _context.Bookmarks.Add(newBookmark);
             _context.SaveChanges();
 
-            return _mapper.Map<Bookmark, Dto.Bookmark>(newBookmark);
+            var dto = _mapper.Map<Bookmark, Dto.Bookmark>(newBookmark);
+            dto.Petfinder_link = LinkService.GeneratePetfinderLink(api_version, dto.Id);
+            return dto;
         }
 
         public void Delete(int id)
@@ -75,7 +83,7 @@ namespace bootcamp_api.Services
             _context.SaveChanges();
         }
 
-        public Dto.Bookmark Update(int id, Dto.Bookmark bookmark)
+        public Dto.Bookmark Update(int id, int api_version, Dto.Bookmark bookmark)
         {
             if (id != bookmark.Id)
                 throw new Exception();
@@ -87,13 +95,14 @@ namespace bootcamp_api.Services
             existingBookmark.Note = bookmark.Note;
             existingBookmark.External_url = bookmark.External_url;
             existingBookmark.Petfinder_id = bookmark.Petfinder_id;
-            existingBookmark.Petfinder_link = bookmark.Petfinder_link;
             existingBookmark.Title = bookmark.Title;
             existingBookmark.DateModified = DateTime.Now;
 
             _context.SaveChanges();
 
-            return _mapper.Map<Bookmark, Dto.Bookmark>(existingBookmark);
+            var dto = _mapper.Map<Bookmark, Dto.Bookmark>(existingBookmark);
+            dto.Petfinder_link = LinkService.GeneratePetfinderLink(api_version, dto.Id);
+            return dto;
         }
     }
 }

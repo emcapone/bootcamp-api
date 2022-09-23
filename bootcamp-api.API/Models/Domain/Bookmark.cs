@@ -9,8 +9,6 @@ namespace Domain
         public int Id { get; set; }
         public int User_id { get; set; }
         [Required]
-        public string Petfinder_link { get; set; } = string.Empty;
-        [Required]
         public int Petfinder_id { get; set; }
         [Required]
         public string Title { get; set; } = string.Empty;
