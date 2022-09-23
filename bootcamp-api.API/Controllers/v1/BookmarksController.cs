@@ -32,9 +32,9 @@ namespace bootcamp_api.Controllers
         /// </summary>
         [HttpGet("GetAll/{user_id}/Petfinder/v{petfinder_version}")]
         [ProducesResponseType(typeof(Bookmark[]), StatusCodes.Status200OK)]
-        public IActionResult GetAll(int user_id, int petfinder_version)
+        public IActionResult GetAll(ApiVersion version, int user_id, int petfinder_version)
         {
-            return new OkObjectResult(_bookmarkService.GetAll(user_id, petfinder_version));
+            return new OkObjectResult(_bookmarkService.GetAll(version, user_id, petfinder_version));
         }
 
         /// <summary>
@@ -43,11 +43,11 @@ namespace bootcamp_api.Controllers
         [HttpGet("{id}/Petfinder/v{petfinder_version}")]
         [ProducesResponseType(typeof(Bookmark), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public IActionResult Get(int id, int petfinder_version)
+        public IActionResult Get(ApiVersion version, int id, int petfinder_version)
         {
             try
             {
-                return new ObjectResult(_bookmarkService.Get(id, petfinder_version));
+                return new ObjectResult(_bookmarkService.Get(version, id, petfinder_version));
             }
             catch (BookmarkNotFoundException)
             {
@@ -61,11 +61,11 @@ namespace bootcamp_api.Controllers
         [HttpPost("{user_id}/Petfinder/v{petfinder_version}")]
         [ProducesResponseType(typeof(Bookmark), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public IActionResult Create(int user_id, int petfinder_version, Bookmark bookmark)
+        public IActionResult Create(ApiVersion version, int user_id, int petfinder_version, Bookmark bookmark)
         {
             try
             {
-                var createdBookmark = _bookmarkService.Add(user_id, petfinder_version, bookmark);
+                var createdBookmark = _bookmarkService.Add(version, user_id, petfinder_version, bookmark);
                 return CreatedAtAction(nameof(Create), new { id = createdBookmark.Id }, createdBookmark);
             }
             catch (DuplicateBookmarkException e)
@@ -85,11 +85,11 @@ namespace bootcamp_api.Controllers
         [ProducesResponseType(typeof(Bookmark), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public IActionResult Update(int id, int petfinder_version, Bookmark bookmark)
+        public IActionResult Update(ApiVersion version, int id, int petfinder_version, Bookmark bookmark)
         {
             try
             {
-                return new OkObjectResult(_bookmarkService.Update(id, petfinder_version, bookmark));
+                return new OkObjectResult(_bookmarkService.Update(version, id, petfinder_version, bookmark));
             }
             catch (BookmarkNotFoundException)
             {

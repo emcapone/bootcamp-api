@@ -44,7 +44,7 @@ namespace bootcamp_api.Services
 
             foreach(Dto.PetListItem x in pets)
             {
-                x.Link = LinkService.GenerateLocalLink(version, x.Id); 
+                x.Link = LinkService.GeneratePetsLink(version, x.Id); 
             }
 
             return pets;
@@ -64,7 +64,7 @@ namespace bootcamp_api.Services
                 throw new PetNotFoundException(id);
 
             var dto = _mapper.Map<Pet, Dto.Pet>(pet);
-            dto.Link = LinkService.GenerateLocalLink(version, dto.Id);
+            dto.Link = LinkService.GeneratePetsLink(version, dto.Id);
             return dto;
         }
 
@@ -138,7 +138,7 @@ namespace bootcamp_api.Services
             _context.SaveChanges();
 
             var dto = _mapper.Map<Pet, Dto.Pet>(newPet);
-            dto.Link = LinkService.GenerateLocalLink(version, dto.Id);
+            dto.Link = LinkService.GeneratePetsLink(version, dto.Id);
             return dto;
         }
 
@@ -260,7 +260,7 @@ namespace bootcamp_api.Services
             _context.SaveChanges();
 
             var dto = _mapper.Map<Pet, Dto.Pet>(existingPet);
-            dto.Link = LinkService.GenerateLocalLink(version, dto.Id);
+            dto.Link = LinkService.GeneratePetsLink(version, dto.Id);
             return dto;
         }
     }

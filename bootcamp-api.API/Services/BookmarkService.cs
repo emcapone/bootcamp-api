@@ -5,6 +5,7 @@ using System.Linq;
 using Domain;
 using bootcamp_api.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using bootcamp_api.Data;
 using AutoMapper;
 
@@ -15,7 +16,7 @@ namespace bootcamp_api.Services
 
         private readonly PawssierContext _context;
         private readonly IMapper _mapper;
-
+        private const string controller = "Bookmarks";
 
         public BookmarkService(PawssierContext context, IMapper mapper)
         {
@@ -23,30 +24,32 @@ namespace bootcamp_api.Services
             _context = context;
         }
 
-        public Dto.Bookmark[] GetAll(int user_id, int api_version)
+        public Dto.Bookmark[] GetAll(ApiVersion version, int user_id, int pf_version)
         {
             var bookmarks = _context.Bookmarks.Where(b => b.User_id == user_id);
             var bookmarkAry = bookmarks.OrderBy(b => b.Id).ToArray();
             var dtos = _mapper.Map<Bookmark[], Dto.Bookmark[]>(bookmarkAry);
             foreach(Dto.Bookmark x in dtos)
             {
-                x.Petfinder_link = LinkService.GeneratePetfinderLink(api_version, x.Id);
+                x.Petfinder_link = LinkService.GeneratePetfinderLink(pf_version, x.Petfinder_id);
+                x.Link = LinkService.GenerateBookmarksLink(version, x.Id, pf_version);
             }
             return dtos;
         }
 
-        public Dto.Bookmark Get(int id, int api_version)
+        public Dto.Bookmark Get(ApiVersion version, int id, int pf_version)
         {
             var bookmark = _context.Bookmarks.SingleOrDefault(b => b.Id == id);
             if (bookmark == null)
                 throw new BookmarkNotFoundException(id);
 
             var dto = _mapper.Map<Bookmark, Dto.Bookmark>(bookmark);
-            dto.Petfinder_link = LinkService.GeneratePetfinderLink(api_version, dto.Id);
+            dto.Petfinder_link = LinkService.GeneratePetfinderLink(pf_version, dto.Petfinder_id);
+            dto.Link = LinkService.GenerateBookmarksLink(version, dto.Id, pf_version);
             return dto;
         }
 
-        public Dto.Bookmark Add(int user_id, int api_version, Dto.Bookmark bookmark)
+        public Dto.Bookmark Add(ApiVersion version, int user_id, int pf_version, Dto.Bookmark bookmark)
         {
             var dupe = _context.Bookmarks.SingleOrDefault(b => b.Petfinder_id == bookmark.Petfinder_id);
             if (dupe is not null)
@@ -69,7 +72,8 @@ namespace bootcamp_api.Services
             _context.SaveChanges();
 
             var dto = _mapper.Map<Bookmark, Dto.Bookmark>(newBookmark);
-            dto.Petfinder_link = LinkService.GeneratePetfinderLink(api_version, dto.Id);
+            dto.Petfinder_link = LinkService.GeneratePetfinderLink(pf_version, dto.Petfinder_id);
+            dto.Link = LinkService.GenerateBookmarksLink(version, dto.Id, pf_version);
             return dto;
         }
 
@@ -83,7 +87,7 @@ namespace bootcamp_api.Services
             _context.SaveChanges();
         }
 
-        public Dto.Bookmark Update(int id, int api_version, Dto.Bookmark bookmark)
+        public Dto.Bookmark Update(ApiVersion version, int id, int pf_version, Dto.Bookmark bookmark)
         {
             if (id != bookmark.Id)
                 throw new Exception();
@@ -101,7 +105,8 @@ namespace bootcamp_api.Services
             _context.SaveChanges();
 
             var dto = _mapper.Map<Bookmark, Dto.Bookmark>(existingBookmark);
-            dto.Petfinder_link = LinkService.GeneratePetfinderLink(api_version, dto.Id);
+            dto.Petfinder_link = LinkService.GeneratePetfinderLink(pf_version, dto.Petfinder_id);
+            dto.Link = LinkService.GenerateBookmarksLink(version, dto.Id, pf_version);
             return dto;
         }
     }

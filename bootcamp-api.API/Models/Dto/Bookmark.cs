@@ -12,5 +12,6 @@ namespace Dto
         public string Note { get; set; } = string.Empty;
         public DateTime? SavedAt { get; set; }
         public string External_url { get; set; } = string.Empty;
+        public string Link { get; set; } = string.Empty;
     }
 }

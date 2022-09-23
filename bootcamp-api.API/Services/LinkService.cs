@@ -6,14 +6,19 @@ namespace bootcamp_api.Services
     {
         public LinkService() { }
 
-        public static string GenerateLocalLink(ApiVersion version, int id)
+        public static string GeneratePetsLink(ApiVersion version, int id)
         {
-            return "/api/v" + version + "/Pets/" + id;
+            return $"/api/v{version}/Pets/{id}";
+        }
+
+        public static string GenerateBookmarksLink(ApiVersion version, int id, int pf_version)
+        {
+            return $"/api/v{version}/Bookmarks/{id}/Petfinder/v{pf_version}";
         }
 
         public static string GeneratePetfinderLink(int version, int id)
         {
-            return "/v" + version + "/animals/" + id;
+            return $"/v{version}/animals/{id}";
         }
     }
 }
