@@ -2,7 +2,12 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Swashbuckle.AspNetCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
+using bootcamp_api.Data;
+using bootcamp_api.Services;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
@@ -46,6 +51,21 @@ builder.Services.AddSwaggerGen(c =>
             $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 
     });
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.ReportApiVersions = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+});
+
+builder.Services
+    .AddDbContext<PawssierContext>(p => p.UseSqlServer("Server=localhost;Database=PawssierDB;Trusted_Connection=True;"));
+
+builder.Services.AddScoped<IBookmarkService, BookmarkService>();
+builder.Services.AddScoped<IPetService, PetService>();
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
