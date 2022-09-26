@@ -5,9 +5,22 @@ public class PetServiceTests: IDisposable
 
     private readonly DbConnection _connection;
     private readonly DbContextOptions<PawssierContext> _contextOptions;
+    private readonly IMapper _mapper;
+    private readonly ApiVersion apiVersion = new ApiVersion(1, 0);
+    private readonly int user_id = 1;
 
     public PetServiceTests()
     {
+        if (_mapper == null)
+        {
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new PawssierMappingProfile());
+            });
+            IMapper mapper = mappingConfig.CreateMapper();
+            _mapper = mapper;
+        }
+
         // Create and open a connection. This creates the SQLite in-memory database, which will persist until the connection is closed
         // at the end of the test (see Dispose below).
         _connection = new SqliteConnection("Filename=:memory:");
@@ -30,6 +43,17 @@ public class PetServiceTests: IDisposable
                 FROM Pets;";
             viewCommand.ExecuteNonQuery();
         }
+
+        context.Users.Add(
+            new User
+            {
+                Id = user_id,
+                FirstName = "Pawssier",
+                LastName = "User",
+                Email = "user@pawssier.com",
+                Birthday = new DateTime(),
+                Password = "Password123"
+            });
 
         context.Pets.AddRange( NewDomainPet(), NewDomainPet() );
 
@@ -87,7 +111,8 @@ public class PetServiceTests: IDisposable
                 Vaccines = vaccines,
                 Conditions = conditions,
                 DateAdded = DateTime.UtcNow,
-                DateModified = DateTime.UtcNow
+                DateModified = DateTime.UtcNow,
+                User_id = user_id
             };
     }
 
@@ -149,19 +174,17 @@ public class PetServiceTests: IDisposable
     }
 
     [Fact]
-    public async void GetAll_Returns_All_Pets()
+    public async void GetAll_Returns_All_Of_A_Users_Pets_As_PetListItems()
     {
         //Arrange
         var context = CreateContext();
-        var petService = new PetService(context);
-        var currentCount = context.Pets.Count();
+        var petService = new PetService(context, _mapper);
+        var currentCount = context.Pets.Where(p => p.User_id == user_id).Count();
         //Act
-        var pets = petService.GetAll();
+        var pets = petService.GetAll(apiVersion, user_id);
         //Assert
         pets.Length.Should().Be(currentCount);
-        pets[0].Conditions.Should().NotBeNull();
-        pets[0].Prescriptions.Should().NotBeNull();
-        pets[0].Vaccines.Should().NotBeNull();
+        pets.Should().BeOfType<Dto.PetListItem[]>();
     }
 
     [Fact]
@@ -169,11 +192,12 @@ public class PetServiceTests: IDisposable
     {
         //Arrange
         var context = CreateContext();
-        var petService = new PetService(context);
+        var petService = new PetService(context, _mapper);
+        var id = 1;
         //Act
-        var pet = petService.Get(1);
+        var pet = petService.Get(apiVersion, id);
         //Assert
-        pet.Id.Should().Be(1);
+        pet.Id.Should().Be(id);
     }
 
     [Fact]
@@ -181,9 +205,9 @@ public class PetServiceTests: IDisposable
     {
         //Arrange
         var context = CreateContext();
-        var petService = new PetService(context);
+        var petService = new PetService(context, _mapper);
         //Act
-        Action act = () => petService.Get(-1);
+        Action act = () => petService.Get(apiVersion, -1);
         //Assert
         act.Should().Throw<PetNotFoundException>();
     }
@@ -194,10 +218,10 @@ public class PetServiceTests: IDisposable
         //Arrange
         var newPet = NewDtoPet();
         var context = CreateContext();
-        var petService = new PetService(context);
+        var petService = new PetService(context, _mapper);
         var originalCount = context.Pets.Count();
         //Act
-        petService.Add(newPet);
+        petService.Add(apiVersion, user_id, newPet);
         //Assert
         context.Pets.Count().Should().Be(originalCount + 1);
         context.Conditions.Count().Should().Be(originalCount + 1);
@@ -211,7 +235,7 @@ public class PetServiceTests: IDisposable
     {
         //Arrange
         var context = CreateContext();
-        var petService = new PetService(context);
+        var petService = new PetService(context, _mapper);
         int id = 1;
         var pet = context.Pets.SingleOrDefault(p => p.Id == id);
         //Act
@@ -228,7 +252,7 @@ public class PetServiceTests: IDisposable
     {
         //Arrange
         var context = CreateContext();
-        var petService = new PetService(context);
+        var petService = new PetService(context, _mapper);
         //Act
         Action act = () => petService.Delete(-1);
         //Assert
@@ -244,9 +268,9 @@ public class PetServiceTests: IDisposable
         updatedPet.Name = "New Name!";
         updatedPet.Conditions[0].Name = "New Condition Name!";
         var context = CreateContext();
-        var petService = new PetService(context);
+        var petService = new PetService(context, _mapper);
         //Act
-        var pet = petService.Update(2, updatedPet);
+        var pet = petService.Update(apiVersion, updatedPet.Id, updatedPet);
         //Assert
         pet.Name.Should().Be(updatedPet.Name);
         pet.Conditions[0].Name.Should().Be(updatedPet.Conditions[0].Name);
@@ -259,9 +283,9 @@ public class PetServiceTests: IDisposable
         var updatedPet = NewDtoPet();
         updatedPet.Id = -1;
         var context = CreateContext();
-        var petService = new PetService(context);
+        var petService = new PetService(context, _mapper);
         //Act
-        Action act = () => petService.Update(-1, updatedPet);
+        Action act = () => petService.Update(apiVersion, -1, updatedPet);
         //Assert
         act.Should().Throw<PetNotFoundException>();
     }
@@ -273,9 +297,9 @@ public class PetServiceTests: IDisposable
         var updatedPet = NewDtoPet();
         updatedPet.Id = 1;
         var context = CreateContext();
-        var petService = new PetService(context);
+        var petService = new PetService(context, _mapper);
         //Act
-        Action act = () => petService.Update(4, updatedPet);
+        Action act = () => petService.Update(apiVersion, 4, updatedPet);
         //Assert
         act.Should().Throw<Exception>();
     }

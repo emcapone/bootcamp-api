@@ -5,9 +5,23 @@ public class BookmarkServiceTests: IDisposable
 
     private readonly DbConnection _connection;
     private readonly DbContextOptions<PawssierContext> _contextOptions;
+    private readonly IMapper _mapper;
+    private readonly int user_id = 1;
+    private readonly ApiVersion apiVersion = new ApiVersion(1, 0);
+    private readonly int pfVersion = 2;
 
     public BookmarkServiceTests()
     {
+        if (_mapper == null)
+        {
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new PawssierMappingProfile());
+            });
+            IMapper mapper = mappingConfig.CreateMapper();
+            _mapper = mapper;
+        }
+
         // Create and open a connection. This creates the SQLite in-memory database, which will persist until the connection is closed
         // at the end of the test (see Dispose below).
         _connection = new SqliteConnection("Filename=:memory:");
@@ -31,28 +45,39 @@ public class BookmarkServiceTests: IDisposable
             viewCommand.ExecuteNonQuery();
         }
 
+        context.Users.Add(
+            new User
+            {
+                Id = user_id,
+                FirstName = "Pawssier",
+                LastName = "User",
+                Email = "user@pawssier.com",
+                Birthday = new DateTime(),
+                Password = "Password123"
+            });
+
         context.Bookmarks.AddRange(
             new Bookmark
             {
                 Id = 1,
-                Link = "\\v1\\pet\\12345",
-                Petfinder_Id = 12345,
+                Petfinder_id = 12345,
                 Title = "Bookmark 1 Title",
                 Note = "Bookmark created on Safari",
                 SavedAt = DateTime.UtcNow,
-                External_Url = "petfinder.com/12345",
-                DateModified = DateTime.UtcNow
+                External_url = "petfinder.com/12345",
+                DateModified = DateTime.UtcNow,
+                User_id = user_id
             },
             new Bookmark
             {
                 Id = 2,
-                Link = "\\v1\\pet\\67890",
-                Petfinder_Id = 67890,
+                Petfinder_id = 67890,
                 Title = "Bookmark 2 Title",
                 Note = "Bookmark created on Safari",
                 SavedAt = DateTime.UtcNow,
-                External_Url = "petfinder.com/67890",
-                DateModified = DateTime.UtcNow
+                External_url = "petfinder.com/67890",
+                DateModified = DateTime.UtcNow,
+                User_id = user_id
             });
         context.SaveChanges();
     }
@@ -62,14 +87,14 @@ public class BookmarkServiceTests: IDisposable
     public void Dispose() => _connection.Dispose();
     
     [Fact]
-    public async void GetAll_Returns_All_Bookmarks()
+    public async void GetAll_Returns_All_Of_A_Users_Bookmarks()
     {
         //Arrange
         var context = CreateContext();
-        var bookmarkService = new BookmarkService(context);
-        var currentCount = context.Bookmarks.Count();
+        var bookmarkService = new BookmarkService(context, _mapper);
+        var currentCount = context.Bookmarks.Where(b => b.User_id == user_id).Count();
         //Act
-        var bookmarks = bookmarkService.GetAll();
+        var bookmarks = bookmarkService.GetAll(apiVersion, user_id, pfVersion);
         //Assert
         bookmarks.Length.Should().Be(currentCount);
     }
@@ -79,11 +104,12 @@ public class BookmarkServiceTests: IDisposable
     {
         //Arrange
         var context = CreateContext();
-        var bookmarkService = new BookmarkService(context);
+        var bookmarkService = new BookmarkService(context, _mapper);
+        var id = 1;
         //Act
-        var bookmark = bookmarkService.Get(1);
+        var bookmark = bookmarkService.Get(apiVersion, id, pfVersion);
         //Assert
-        bookmark.Id.Should().Be(1);
+        bookmark.Id.Should().Be(id);
     }
 
     [Fact]
@@ -91,9 +117,9 @@ public class BookmarkServiceTests: IDisposable
     {
         //Arrange
         var context = CreateContext();
-        var bookmarkService = new BookmarkService(context);
+        var bookmarkService = new BookmarkService(context, _mapper);
         //Act
-        Action act = () => bookmarkService.Get(-1);
+        Action act = () => bookmarkService.Get(apiVersion, -1, pfVersion);
         //Assert
         act.Should().Throw<BookmarkNotFoundException>();
     }
@@ -104,18 +130,17 @@ public class BookmarkServiceTests: IDisposable
         //Arrange
         var newBookmark = new Dto.Bookmark
             {
-                Link = "\\v1\\pet\\99",
-                Petfinder_Id = 99,
+                Petfinder_id = 99,
                 Title = "Bookmark 3 Title",
                 Note = "Bookmark created on Safari",
                 SavedAt = DateTime.UtcNow,
-                External_Url = "petfinder.com/99"
+                External_url = "petfinder.com/99"
             };
         var context = CreateContext();
-        var bookmarkService = new BookmarkService(context);
-        var currentCount = context.Bookmarks.Count();
+        var bookmarkService = new BookmarkService(context, _mapper);
+        var currentCount = context.Bookmarks.Where(b => b.User_id == user_id).Count();
         //Act
-        bookmarkService.Add(newBookmark);
+        bookmarkService.Add(apiVersion, user_id, pfVersion, newBookmark);
         //Assert
         context.Bookmarks.Count().Should().Be(currentCount + 1);
     }
@@ -125,19 +150,18 @@ public class BookmarkServiceTests: IDisposable
     {
         //Arrange
         var context = CreateContext();
-        var bookmarkService = new BookmarkService(context);
-        var duplicatePetfinderId = context.Bookmarks.SingleOrDefault(b => b.Id == 1).Petfinder_Id;
+        var bookmarkService = new BookmarkService(context, _mapper);
+        var duplicatePetfinderId = context.Bookmarks.SingleOrDefault(b => b.Id == 1).Petfinder_id;
         var newBookmark = new Dto.Bookmark
         {
-            Link = "\\v1\\pet\\99",
-            Petfinder_Id = duplicatePetfinderId,
+            Petfinder_id = duplicatePetfinderId,
             Title = "Bookmark 3 Title",
             Note = "Bookmark created on Safari",
             SavedAt = DateTime.UtcNow,
-            External_Url = "petfinder.com/99"
+            External_url = "petfinder.com/99"
         };
         //Act
-        Action act = () => bookmarkService.Add(newBookmark);
+        Action act = () => bookmarkService.Add(apiVersion, user_id, pfVersion, newBookmark);
         //Assert
         act.Should().Throw<DuplicateBookmarkException>();
     }
@@ -147,10 +171,10 @@ public class BookmarkServiceTests: IDisposable
     {
         //Arrange
         var context = CreateContext();
-        var bookmarkService = new BookmarkService(context);
+        var bookmarkService = new BookmarkService(context, _mapper);
         int id = 1;
         //Act
-        bookmarkService.Delete(1);
+        bookmarkService.Delete(id);
         //Assert
         context.Bookmarks.SingleOrDefault(b => b.Id == id).Should().BeNull();
     }
@@ -160,7 +184,7 @@ public class BookmarkServiceTests: IDisposable
     {
         //Arrange
         var context = CreateContext();
-        var bookmarkService = new BookmarkService(context);
+        var bookmarkService = new BookmarkService(context, _mapper);
         //Act
         Action act = () => bookmarkService.Delete(-1);
         //Assert
@@ -171,20 +195,20 @@ public class BookmarkServiceTests: IDisposable
     public void Update_Updates_Correct_Bookmark()
     {
         //Arrange
+        var id = 2;
         var updatedBookmark = new Dto.Bookmark
         {
-            Id = 2,
-            Link = "\\v1\\pet\\67890",
-            Petfinder_Id = 67890,
+            Id = id,
+            Petfinder_id = 67890,
             Title = "Bookmark 2 Title: Revamped",
             Note = "Bookmark created on Safari",
             SavedAt = DateTime.UtcNow,
-            External_Url = "petfinder.com/67890"
+            External_url = "petfinder.com/67890"
         };
         var context = CreateContext();
-        var bookmarkService = new BookmarkService(context);
+        var bookmarkService = new BookmarkService(context, _mapper);
         //Act
-        var bookmark = bookmarkService.Update(2, updatedBookmark);
+        var bookmark = bookmarkService.Update(apiVersion, id, pfVersion, updatedBookmark);
         //Assert
         bookmark.Title.Should().Be(updatedBookmark.Title);
     }
@@ -197,16 +221,16 @@ public class BookmarkServiceTests: IDisposable
         {
             Id = -1,
             Link = "\\v1\\pet\\67890",
-            Petfinder_Id = 67890,
+            Petfinder_id = 67890,
             Title = "Bookmark -1 Title: Revamped",
             Note = "Bookmark created on Safari",
             SavedAt = DateTime.UtcNow,
-            External_Url = "petfinder.com/67890"
+            External_url = "petfinder.com/67890"
         };
         var context = CreateContext();
-        var bookmarkService = new BookmarkService(context);
+        var bookmarkService = new BookmarkService(context, _mapper);
         //Act
-        Action act = () => bookmarkService.Update(-1, updatedBookmark);
+        Action act = () => bookmarkService.Update(apiVersion, -1, pfVersion, updatedBookmark);
         //Assert
         act.Should().Throw<BookmarkNotFoundException>();
     }
@@ -218,17 +242,16 @@ public class BookmarkServiceTests: IDisposable
         var updatedBookmark = new Dto.Bookmark
         {
             Id = 3,
-            Link = "\\v1\\pet\\67890",
-            Petfinder_Id = 67890,
+            Petfinder_id = 67890,
             Title = "Bookmark -1 Title: Revamped",
             Note = "Bookmark created on Safari",
             SavedAt = DateTime.UtcNow,
-            External_Url = "petfinder.com/67890"
+            External_url = "petfinder.com/67890"
         };
         var context = CreateContext();
-        var bookmarkService = new BookmarkService(context);
+        var bookmarkService = new BookmarkService(context, _mapper);
         //Act
-        Action act = () => bookmarkService.Update(4, updatedBookmark);
+        Action act = () => bookmarkService.Update(apiVersion, 4, pfVersion, updatedBookmark);
         //Assert
         act.Should().Throw<Exception>();
     }
