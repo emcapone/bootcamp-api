@@ -16,7 +16,6 @@ namespace bootcamp_api.Services
 
         private readonly PawssierContext _context;
         private readonly IMapper _mapper;
-        private const string controller = "Bookmarks";
 
         public BookmarkService(PawssierContext context, IMapper mapper)
         {
