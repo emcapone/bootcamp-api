@@ -19,5 +19,7 @@ namespace bootcamp_api.Data
         public DbSet<User> Users { get; set; }
 
         public DbSet<Bookmark> Bookmarks { get; set; }
+
+        public DbSet<CalendarEvent> CalendarEvents { get; set; }
     }
 }

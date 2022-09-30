@@ -20,5 +20,11 @@ namespace bootcamp_api.Services
         {
             return $"/v{version}/animals/{id}";
         }
+
+        public static string GenerateCalendarEventsLink(ApiVersion version, int id)
+        {
+            return $"/api/v{version}/CalendarEvents/{id}";
+        }
+
     }
 }
