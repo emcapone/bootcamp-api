@@ -10,7 +10,7 @@ namespace Dto
         public string Breed { get; set; } = String.Empty;
         public string Color { get; set; } = String.Empty;
         public string Description { get; set; } = String.Empty;
-        public string Microchip { get; set; } = String.Empty;
+        public string? Microchip { get; set; }
         public string Sex { get; set; } = String.Empty;
         public bool Fixed { get; set; }
         public double Weight { get; set; }
@@ -19,9 +19,9 @@ namespace Dto
         public FileLink? VetRecords { get; set; }
         public FileLink? PetPhoto { get; set; }
         public Prescription[]? Prescriptions { get; set; }
-        public Vaccine[] Vaccines { get; set; } = new Vaccine[0];
-        public Condition[] Conditions { get; set; } = new Condition[0];
-        public string Link { get; set; } = string.Empty;
+        public Vaccine[]? Vaccines { get; set; } = new Vaccine[0];
+        public Condition[]? Conditions { get; set; } = new Condition[0];
+        public string? Link { get; set; } = string.Empty;
     }
 
     public class Prescription

@@ -7,6 +7,7 @@ namespace Domain
     {
         [Key]
         public int Id { get; set; }
+        [Required]
         public int User_id { get; set; }
         [Required]
         public int Petfinder_id { get; set; }
@@ -15,10 +16,10 @@ namespace Domain
         [Required]
         public string Note { get; set; } = string.Empty;
         [Required]
-        public DateTime? SavedAt { get; set; }
+        public DateTime SavedAt { get; set; }
         [Required]
         public string External_url { get; set; } = string.Empty;
-
-        public DateTime? DateModified { get; set; }
+        [Required]
+        public DateTime DateModified { get; set; }
     }
 }
