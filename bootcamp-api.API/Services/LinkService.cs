@@ -26,5 +26,9 @@ namespace bootcamp_api.Services
             return $"/api/v{version}/CalendarEvents/{id}";
         }
 
+        public static string GenerateUserLink(ApiVersion version, int id)
+        {
+            return $"/api/v{version}/User/{id}";
+        }
     }
 }
