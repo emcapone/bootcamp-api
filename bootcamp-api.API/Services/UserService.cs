@@ -60,6 +60,7 @@ namespace bootcamp_api.Services
                 LastName = user.LastName,
                 Birthday = user.Birthday,
                 Email = user.Email,
+                Password = user.Password,
                 DateAdded = now,
                 DateModified = now
             };
@@ -98,8 +99,8 @@ namespace bootcamp_api.Services
             currentUser.FirstName = updatedUser.FirstName;
             currentUser.LastName = updatedUser.LastName;
             currentUser.Birthday = updatedUser.Birthday;
-            currentUser.Email = currentUser.Email;
-            currentUser.Password = currentUser.Password;
+            currentUser.Email = updatedUser.Email;
+            currentUser.Password = updatedUser.Password;
             currentUser.DateModified = DateTime.Now;
 
             _context.SaveChanges();

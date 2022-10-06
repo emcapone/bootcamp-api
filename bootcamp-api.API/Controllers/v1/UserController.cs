@@ -54,6 +54,7 @@ namespace bootcamp_api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(User), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
         public IActionResult Create(ApiVersion version, User user)
         {
             try
@@ -63,7 +64,7 @@ namespace bootcamp_api.Controllers
             }
             catch (DuplicateUserException e)
             {
-                return new BadRequestObjectResult(e.Message);
+                return new ConflictObjectResult(e.Message);
             }
             catch (Exception)
             {
@@ -77,6 +78,7 @@ namespace bootcamp_api.Controllers
         [HttpPost("Auth")]
         [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public IActionResult Get(ApiVersion version, Credentials credentials)
         {
             try
@@ -84,6 +86,10 @@ namespace bootcamp_api.Controllers
                 return new ObjectResult(_userService.Authenticate(version, credentials));
             }
             catch (UnauthorizedException)
+            {
+                return new NotFoundResult();
+            }
+            catch (Exception)
             {
                 return new BadRequestResult();
             }
