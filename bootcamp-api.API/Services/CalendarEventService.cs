@@ -27,18 +27,16 @@ namespace bootcamp_api.Services
 
         public Dto.CalendarEvent[] Get(ApiVersion version, int user_id, int month = 0, int year = 0)
         {
-            var calendarEvents = new CalendarEvent[0];
+            var query = _context.CalendarEvents.Where(e => e.User_id == user_id);
 
             if (month < 0 || month > 12 || year < 0 || (month != 0 && year == 0))
                 throw new Exception();
-            else if (month == 0 && year == 0)
-                calendarEvents = _context.CalendarEvents.Where(e => e.User_id == user_id).ToArray();
-            else if (month == 0 && year != 0)
-                calendarEvents = _context.CalendarEvents.Where(e => (e.User_id == user_id && e.Date.Year == year)).ToArray();
-            else if (month != 0 && year != 0)
-                calendarEvents = _context.CalendarEvents.Where(e => (e.User_id == user_id && e.Date.Month == month && e.Date.Year == year)).ToArray();
-            else
-                throw new Exception();
+            if (year != 0)
+                query = query.Where(e => e.Date.Year == year);
+            if (month != 0)
+                query = query.Where(e => e.Date.Month == month);
+
+            var calendarEvents = query.ToArray();
 
             var dtos = _mapper.Map<CalendarEvent[], Dto.CalendarEvent[]>(calendarEvents);
             foreach (Dto.CalendarEvent x in dtos)
