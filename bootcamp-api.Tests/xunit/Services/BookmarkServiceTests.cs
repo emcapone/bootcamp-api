@@ -1,4 +1,4 @@
-namespace bootcamp_api.Tests.Services;
+namespace bootcamp_api.Tests.XUnit.Services;
 
 public class BookmarkServiceTests: IDisposable
 {
@@ -87,7 +87,7 @@ public class BookmarkServiceTests: IDisposable
     public void Dispose() => _connection.Dispose();
     
     [Fact]
-    public async void GetAll_Returns_All_Of_A_Users_Bookmarks()
+    public void GetAll_Returns_All_Of_A_Users_Bookmarks()
     {
         //Arrange
         var context = CreateContext();

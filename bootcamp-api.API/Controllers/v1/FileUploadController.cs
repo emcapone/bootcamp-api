@@ -16,6 +16,8 @@ namespace bootcamp_api.Controllers
     /// </summary>
     [ApiController]
     [ApiVersion("1.0")]
+    [Produces("application/json")]
+    [Consumes("multipart/form-data")]
     [Route("api/v{version:apiVersion}/[controller]")]
     public class FileUploadController : ControllerBase
     {

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using bootcamp_api.Data;
 
@@ -11,9 +12,10 @@ using bootcamp_api.Data;
 namespace bootcamp_api.Migrations
 {
     [DbContext(typeof(PawssierContext))]
-    partial class PawssierContextModelSnapshot : ModelSnapshot
+    [Migration("20220927185745_CalendarEventUpdate")]
+    partial class CalendarEventUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,7 +32,7 @@ namespace bootcamp_api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<DateTime>("DateModified")
+                    b.Property<DateTime?>("DateModified")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("External_url")
@@ -44,7 +46,8 @@ namespace bootcamp_api.Migrations
                     b.Property<int>("Petfinder_id")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("SavedAt")
+                    b.Property<DateTime?>("SavedAt")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
@@ -75,10 +78,12 @@ namespace bootcamp_api.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateAdded")
+                    b.Property<DateTime?>("DateAdded")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateModified")
+                    b.Property<DateTime?>("DateModified")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Details")
@@ -86,6 +91,7 @@ namespace bootcamp_api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EndTime")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -93,6 +99,7 @@ namespace bootcamp_api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StartTime")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("User_id")
@@ -118,6 +125,7 @@ namespace bootcamp_api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Notes")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("PetId")
@@ -169,10 +177,10 @@ namespace bootcamp_api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DateAdded")
+                    b.Property<DateTime?>("DateAdded")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateModified")
+                    b.Property<DateTime?>("DateModified")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -183,6 +191,7 @@ namespace bootcamp_api.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Microchip")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -257,12 +266,6 @@ namespace bootcamp_api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<DateTime>("Birthday")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateAdded")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateModified")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")

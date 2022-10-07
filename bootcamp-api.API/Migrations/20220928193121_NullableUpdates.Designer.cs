@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using bootcamp_api.Data;
 
@@ -11,9 +12,10 @@ using bootcamp_api.Data;
 namespace bootcamp_api.Migrations
 {
     [DbContext(typeof(PawssierContext))]
-    partial class PawssierContextModelSnapshot : ModelSnapshot
+    [Migration("20220928193121_NullableUpdates")]
+    partial class NullableUpdates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

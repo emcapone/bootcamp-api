@@ -1,4 +1,4 @@
-namespace bootcamp_api.Tests.Services;
+namespace bootcamp_api.Tests.XUnit.Services;
 
 public class PetServiceTests: IDisposable
 {
@@ -174,7 +174,7 @@ public class PetServiceTests: IDisposable
     }
 
     [Fact]
-    public async void GetAll_Returns_All_Of_A_Users_Pets_As_PetListItems()
+    public void GetAll_Returns_All_Of_A_Users_Pets_As_PetListItems()
     {
         //Arrange
         var context = CreateContext();
