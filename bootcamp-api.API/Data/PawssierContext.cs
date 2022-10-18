@@ -21,5 +21,7 @@ namespace bootcamp_api.Data
         public DbSet<Bookmark> Bookmarks { get; set; }
 
         public DbSet<CalendarEvent> CalendarEvents { get; set; }
+
+        public DbSet<Message> Messages { get; set; }
     }
 }

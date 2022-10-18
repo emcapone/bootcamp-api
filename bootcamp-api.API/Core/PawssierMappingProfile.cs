@@ -16,6 +16,7 @@ namespace bootcamp_api.Core
             CreateMap<Bookmark, Dto.Bookmark>();
             CreateMap<User, Dto.User>();
             CreateMap<CalendarEvent, Dto.CalendarEvent>();
+            CreateMap<Message, Dto.Message>();
         }
     }
 }
