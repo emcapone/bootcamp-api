@@ -1,7 +1,5 @@
 using Microsoft.OpenApi.Models;
 using System.Reflection;
-using Swashbuckle.AspNetCore;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
 using bootcamp_api.Data;
@@ -15,7 +13,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200");
+            policy.WithOrigins("*");
             policy.WithMethods("GET", "POST", "OPTIONS", "PUT", "DELETE");
             policy.WithHeaders("Content-Type");
         });
@@ -59,8 +57,10 @@ builder.Services.AddApiVersioning(options =>
     options.DefaultApiVersion = new ApiVersion(1, 0);
 });
 
+var connectionString = builder.Configuration.GetValue<string>("ConnectionStrings:PawssierConnectionString");
+
 builder.Services
-    .AddDbContext<PawssierContext>(p => p.UseSqlServer("Server=localhost;Database=PawssierDB;Trusted_Connection=True;"));
+    .AddDbContext<PawssierContext>(p => p.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<IBookmarkService, BookmarkService>();
 builder.Services.AddScoped<IPetService, PetService>();
@@ -72,29 +72,35 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
+// Migrate the database to the latest version automatically on application startup
+var serviceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+using (var serviceScope = serviceScopeFactory.CreateScope())
+{
+    serviceScope.ServiceProvider.GetService<PawssierContext>().Database.Migrate();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pawssier API V1");
-    });
-
+    app.UseDeveloperExceptionPage();
 }
 
+app.UseRouting();
 app.UseCors();
+app.UseAuthorization();
 
-app.UseStaticFiles(new StaticFileOptions
+app.UseEndpoints(endpoints =>
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources")),
-    RequestPath = new PathString("/Resources")
+    endpoints.MapControllers();
 });
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseSwagger();
 
-app.MapControllers();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pawssier API V1");
+});
 
 app.Run();
