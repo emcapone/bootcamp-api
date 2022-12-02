@@ -75,6 +75,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddGraphQLServer()
     .AllowIntrospection(builder.Environment.IsDevelopment())
     .AddMutationType<PetMutationType>()
+    .AddSubscriptionType<PetSubscriptionType>()
     .AddMutationConventions(applyToAllMutations: true)
     .AddQueryType<PetQueriesType>()
     .SetPagingOptions(new PagingOptions
@@ -84,6 +85,8 @@ builder.Services.AddGraphQLServer()
     .AddFiltering()
     .AddSorting()
     .AddDefaultTransactionScopeHandler();
+
+builder.Services.AddInMemorySubscriptions();
 
 var app = builder.Build();
 
@@ -103,6 +106,8 @@ if (app.Environment.IsDevelopment())
 app.UseRouting();
 app.UseCors();
 app.UseAuthorization();
+
+app.UseWebSockets();
 
 app.UseEndpoints(endpoints =>
 {
