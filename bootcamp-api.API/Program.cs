@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Http.Features;
 using bootcamp_api.Data;
 using bootcamp_api.Services;
 using Microsoft.EntityFrameworkCore;
+using bootcamp_api.Schema;
+using HotChocolate.Types.Pagination;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +72,19 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddGraphQLServer()
+    .AllowIntrospection(builder.Environment.IsDevelopment())
+    .AddMutationType<PetMutationType>()
+    .AddMutationConventions(applyToAllMutations: true)
+    .AddQueryType<PetQueriesType>()
+    .SetPagingOptions(new PagingOptions
+    {
+        MaxPageSize = 100
+    })
+    .AddFiltering()
+    .AddSorting()
+    .AddDefaultTransactionScopeHandler();
+
 var app = builder.Build();
 
 // Migrate the database to the latest version automatically on application startup
@@ -102,5 +117,7 @@ app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pawssier API V1");
 });
+
+app.MapGraphQL("/graphql");
 
 app.Run();
