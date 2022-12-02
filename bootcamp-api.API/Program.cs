@@ -45,7 +45,7 @@ builder.Services.AddSwaggerGen(c =>
             Version = "v1"
         });
         c.EnableAnnotations();
-        c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, 
+        c.IncludeXmlComments(System.IO.Path.Combine(AppContext.BaseDirectory, 
             $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 
     });
@@ -76,7 +76,7 @@ var app = builder.Build();
 var serviceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 using (var serviceScope = serviceScopeFactory.CreateScope())
 {
-    serviceScope.ServiceProvider.GetService<PawssierContext>().Database.Migrate();
+    serviceScope.ServiceProvider.GetService<PawssierContext>()?.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.

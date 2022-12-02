@@ -2,6 +2,6 @@ namespace Dto
 {
     public class FileLink
     {
-        public string DbPath { get; set; } = string.Empty;
+        public string? DbPath { get; set; }
     }
 }

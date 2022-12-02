@@ -40,16 +40,16 @@ namespace bootcamp_api.Controllers
             try
             {
                 var file = Request.Form.Files[0];
-                var folderName = Path.Combine("Resources", "Users", user_id.ToString(), pet_id.ToString(), folder);
+                var folderName = System.IO.Path.Combine("Resources", "Users", user_id.ToString(), pet_id.ToString(), folder);
                 System.IO.Directory.CreateDirectory(folderName);
                 ClearDirectory(folderName);
-                var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+                var pathToSave = System.IO.Path.Combine(Directory.GetCurrentDirectory(), folderName);
 
                 if (file.Length > 0)
                 {
                     var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-                    var fullPath = Path.Combine(pathToSave, fileName);
-                    var dbPath = Path.Combine(folderName, fileName);
+                    var fullPath = System.IO.Path.Combine(pathToSave, fileName);
+                    var dbPath = System.IO.Path.Combine(folderName, fileName);
 
                     using (var stream = new FileStream(fullPath, FileMode.Create))
                     {

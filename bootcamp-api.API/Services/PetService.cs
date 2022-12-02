@@ -36,7 +36,7 @@ namespace bootcamp_api.Services
                 Sex = p.Sex,
                 Birthday = p.Birthday,
                 AdoptionDay = p.AdoptionDay,
-                PetPhoto = new Dto.FileLink { DbPath = p.PetPhoto.DbPath },
+                PetPhoto = (p.PetPhoto == null) ? null : new Dto.FileLink { DbPath = p.PetPhoto.DbPath },
                 PrescriptionsCount = p.Prescriptions.Count(),
                 VaccinesCount = p.Vaccines.Count(),
                 ConditionsCount = p.Conditions.Count()
@@ -199,34 +199,43 @@ namespace bootcamp_api.Services
             _context.Vaccines.RemoveRange(existingPet.Vaccines);
             _context.Prescriptions.RemoveRange(existingPet.Prescriptions);
 
-            foreach (Dto.Condition c in pet.Conditions)
+            if(pet.Conditions is not null)
             {
-                existingPet.Conditions.Add(new Condition
+                foreach (Dto.Condition c in pet.Conditions)
                 {
-                    Name = c.Name,
-                    Notes = c.Notes
-                });
+                    existingPet.Conditions.Add(new Condition
+                    {
+                        Name = c.Name,
+                        Notes = c.Notes
+                    });
+                }
             }
 
-            foreach (Dto.Prescription p in pet.Prescriptions)
+            if(pet.Prescriptions is not null)
             {
-                existingPet.Prescriptions.Add(new Prescription
+                foreach (Dto.Prescription p in pet.Prescriptions)
                 {
-                    Name = p.Name,
-                    Doctor = p.Doctor,
-                    Due = p.Due,
-                    Refills = p.Refills
-                });
+                    existingPet.Prescriptions.Add(new Prescription
+                    {
+                        Name = p.Name,
+                        Doctor = p.Doctor,
+                        Due = p.Due,
+                        Refills = p.Refills
+                    });
+                }
             }
 
-            foreach (Dto.Vaccine p in pet.Vaccines)
+            if(pet.Vaccines is not null)
             {
-                existingPet.Vaccines.Add(new Vaccine
+                foreach (Dto.Vaccine p in pet.Vaccines)
                 {
-                    Name = p.Name,
-                    DateAdministered = p.DateAdministered,
-                    DueDate = p.DueDate
-                });
+                    existingPet.Vaccines.Add(new Vaccine
+                    {
+                        Name = p.Name,
+                        DateAdministered = p.DateAdministered,
+                        DueDate = p.DueDate
+                    });
+                }
             }
 
             var oldPhoto = existingPet.PetPhoto;
