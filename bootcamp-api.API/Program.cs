@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Http.Features;
 using bootcamp_api.Data;
 using bootcamp_api.Services;
 using Microsoft.EntityFrameworkCore;
+using bootcamp_api.Schema;
+using HotChocolate.Types.Pagination;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,7 +47,7 @@ builder.Services.AddSwaggerGen(c =>
             Version = "v1"
         });
         c.EnableAnnotations();
-        c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, 
+        c.IncludeXmlComments(System.IO.Path.Combine(AppContext.BaseDirectory, 
             $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 
     });
@@ -70,13 +72,29 @@ builder.Services.AddScoped<IMessageService, MessageService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+builder.Services.AddGraphQLServer()
+    .AllowIntrospection(builder.Environment.IsDevelopment())
+    .AddMutationType<PetMutationType>()
+    .AddSubscriptionType<PetSubscriptionType>()
+    .AddMutationConventions(applyToAllMutations: true)
+    .AddQueryType<PetQueriesType>()
+    .SetPagingOptions(new PagingOptions
+    {
+        MaxPageSize = 100
+    })
+    .AddFiltering()
+    .AddSorting()
+    .AddDefaultTransactionScopeHandler();
+
+builder.Services.AddInMemorySubscriptions();
+
 var app = builder.Build();
 
 // Migrate the database to the latest version automatically on application startup
 var serviceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 using (var serviceScope = serviceScopeFactory.CreateScope())
 {
-    serviceScope.ServiceProvider.GetService<PawssierContext>().Database.Migrate();
+    serviceScope.ServiceProvider.GetService<PawssierContext>()?.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.
@@ -88,6 +106,8 @@ if (app.Environment.IsDevelopment())
 app.UseRouting();
 app.UseCors();
 app.UseAuthorization();
+
+app.UseWebSockets();
 
 app.UseEndpoints(endpoints =>
 {
@@ -102,5 +122,7 @@ app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pawssier API V1");
 });
+
+app.MapGraphQL("/graphql");
 
 app.Run();
