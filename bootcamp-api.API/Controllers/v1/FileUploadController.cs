@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 using Dto;
+using bootcamp_api.Services;
+using Azure.Storage.Blobs.Models;
+using bootcamp_api.Exceptions;
 
 namespace bootcamp_api.Controllers
 {
@@ -21,47 +24,40 @@ namespace bootcamp_api.Controllers
     [Route("api/v{version:apiVersion}/[controller]")]
     public class FileUploadController : ControllerBase
     {
+
+        private readonly IFileUploadService _fileService;
+
         /// <summary>
-        /// Uploads one file
+        /// FileUploadController constructor
+        /// </summary>
+        public FileUploadController(IFileUploadService fileService)
+        {
+            _fileService = fileService;
+        }
+
+        /// <summary>
+        /// Uploads one non-empty file
         /// </summary>
         /// <remarks>
         /// The body accepts FormData containing at least one file.
         /// Only the first file will be uploaded.
-        /// The file is saved to Resources/Users/{user_id}/{pet_id}/{folder}
+        /// The file is saved to the path pet-files/{user_id}/{pet_id}/{folder}
         /// </remarks>
         /// <param name="user_id">The current user's ID</param>
         /// <param name="pet_id">The current pet's ID</param>
-        /// <param name="folder">The folder the new file should be contained in.</param>
+        /// <param name="folder">The folder the new file should be contained in. This value will be turned into a slug.</param>
         [HttpPost("{user_id}/{pet_id}/{folder}"), DisableRequestSizeLimit]
         [ProducesResponseType(typeof(FileLink), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public IActionResult Upload(int user_id, int pet_id, string folder)
+        public async Task<IActionResult> Upload(int user_id, int pet_id, string folder)
         {
             try
             {
-                var file = Request.Form.Files[0];
-                var folderName = System.IO.Path.Combine("Resources", "Users", user_id.ToString(), pet_id.ToString(), folder);
-                System.IO.Directory.CreateDirectory(folderName);
-                ClearDirectory(folderName);
-                var pathToSave = System.IO.Path.Combine(Directory.GetCurrentDirectory(), folderName);
-
-                if (file.Length > 0)
-                {
-                    var fileName = ContentDispositionHeaderValue.Parse(file.ContentDisposition).FileName.Trim('"');
-                    var fullPath = System.IO.Path.Combine(pathToSave, fileName);
-                    var dbPath = System.IO.Path.Combine(folderName, fileName);
-
-                    using (var stream = new FileStream(fullPath, FileMode.Create))
-                    {
-                        file.CopyTo(stream);
-                    }
-
-                    return Ok(new { dbPath });
-                }
-                else
-                {
-                    throw new Exception();
-                }
+                return Ok(await _fileService.UploadAsync(Request.Form.Files[0], user_id, pet_id, folder));
+            }
+            catch (EmptyFileException e)
+            {
+                return new BadRequestObjectResult(e.Message);
             }
             catch (Exception)
             {
@@ -69,21 +65,5 @@ namespace bootcamp_api.Controllers
             }
         }
 
-        /// <summary>
-        /// Clears a given directory
-        /// </summary>
-        /// <param name="path">The path of the directory to clear</param>
-        public static void ClearDirectory(string path)
-        {
-            System.IO.DirectoryInfo di = new DirectoryInfo(path);
-            foreach (FileInfo file in di.EnumerateFiles())
-            {
-                file.Delete();
-            }
-            foreach (DirectoryInfo dir in di.EnumerateDirectories())
-            {
-                dir.Delete(true);
-            }
-        }
     }
 }

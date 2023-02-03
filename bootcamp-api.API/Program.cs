@@ -7,6 +7,7 @@ using bootcamp_api.Services;
 using Microsoft.EntityFrameworkCore;
 using bootcamp_api.Schema;
 using HotChocolate.Types.Pagination;
+using Azure.Storage.Blobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,14 +62,20 @@ builder.Services.AddApiVersioning(options =>
 
 var connectionString = builder.Configuration.GetValue<string>("ConnectionStrings:PawssierConnectionString");
 
+var storageConnectionString = builder.Configuration.GetValue<string>("ConnectionStrings:AzureBlobStorageConnectionString");
+
 builder.Services
     .AddDbContext<PawssierContext>(p => p.UseSqlServer(connectionString));
+
+builder.Services.
+    AddSingleton(x => new BlobServiceClient(storageConnectionString));
 
 builder.Services.AddScoped<IBookmarkService, BookmarkService>();
 builder.Services.AddScoped<IPetService, PetService>();
 builder.Services.AddScoped<ICalendarEventService, CalendarEventService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
