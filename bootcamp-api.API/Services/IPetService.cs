@@ -6,9 +6,9 @@ namespace bootcamp_api.Services
 {
     public interface IPetService
     {
-        PetListItem[] GetAll(ApiVersion version, int user_id);
+        PetListItem[] GetAll(ApiVersion version, string user_id);
         Pet Get(ApiVersion version, int id);
-        Pet Add(ApiVersion version, int user_id, Pet pet);
+        Pet Add(ApiVersion version, string user_id, Pet pet);
         void Delete(int id);
         Pet Update(ApiVersion version, int id, Pet pet);
     }

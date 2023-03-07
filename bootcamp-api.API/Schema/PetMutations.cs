@@ -14,7 +14,7 @@ namespace bootcamp_api.Schema
             return true;
         }
 
-        public async Task<Pet> AddPet([Service] ITopicEventSender sender, [Service] IPetService petService, int userId, Pet pet)
+        public async Task<Pet> AddPet([Service] ITopicEventSender sender, [Service] IPetService petService, string userId, Pet pet)
         {
             var newPet = petService.Add(new ApiVersion(1, 0), userId, pet);
             await sender.SendAsync(nameof(PetSubscription.PetAdded), newPet);

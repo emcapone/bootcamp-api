@@ -5,6 +5,8 @@ using bootcamp_api.Services;
 using Microsoft.Extensions.Hosting;
 using Dto;
 using System;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Identity.Web.Resource;
 
 namespace bootcamp_api.Controllers
 {
@@ -13,6 +15,8 @@ namespace bootcamp_api.Controllers
     /// Handles incoming HTTP requests for calendar events
     /// </summary>
     [ApiController]
+    [Authorize]
+    [RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
     [ApiVersion("1.0")]
     [Produces("application/json")]
     [Consumes("application/json")]
@@ -35,7 +39,7 @@ namespace bootcamp_api.Controllers
         /// </summary>
         [HttpGet("GetAll/{user_id}")]
         [ProducesResponseType(typeof(CalendarEvent[]), StatusCodes.Status200OK)]
-        public IActionResult GetAll(ApiVersion version, int user_id, [FromQuery] int month, [FromQuery] int year)
+        public IActionResult GetAll(ApiVersion version, string user_id, [FromQuery] int month, [FromQuery] int year)
         {
             try
             {
@@ -57,7 +61,7 @@ namespace bootcamp_api.Controllers
         {
             try
             {
-                return new ObjectResult(_eventService.Get(version, id));
+                return new ObjectResult(_eventService.GetById(version, id));
             }
             catch (CalendarEventNotFoundException)
             {
@@ -71,7 +75,7 @@ namespace bootcamp_api.Controllers
         [HttpPost("{user_id}")]
         [ProducesResponseType(typeof(CalendarEvent), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public IActionResult Create(ApiVersion version, int user_id, CalendarEvent calendarEvent)
+        public IActionResult Create(ApiVersion version, string user_id, CalendarEvent calendarEvent)
         {
             try
             {

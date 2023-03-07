@@ -5,6 +5,8 @@ using bootcamp_api.Services;
 using Microsoft.Extensions.Hosting;
 using Dto;
 using System;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Identity.Web.Resource;
 
 namespace bootcamp_api.Controllers
 {
@@ -13,6 +15,8 @@ namespace bootcamp_api.Controllers
     /// Handles incoming HTTP requests for pets
     /// </summary>
     [ApiController]
+    [Authorize]
+    [RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
     [ApiVersion("1.0")]
     [Produces("application/json")]
     [Consumes("application/json")]
@@ -36,7 +40,7 @@ namespace bootcamp_api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public IActionResult Get(ApiVersion version, int id)
+        public IActionResult Get(ApiVersion version, string id)
         {
             try
             {
@@ -73,36 +77,13 @@ namespace bootcamp_api.Controllers
         }
 
         /// <summary>
-        /// Returns a user if credentials are valid
-        /// </summary>
-        [HttpPost("Auth")]
-        [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public IActionResult Get(ApiVersion version, Credentials credentials)
-        {
-            try
-            {
-                return new ObjectResult(_userService.Authenticate(version, credentials));
-            }
-            catch (UnauthorizedException)
-            {
-                return new NotFoundResult();
-            }
-            catch (Exception)
-            {
-                return new BadRequestResult();
-            }
-        }
-
-        /// <summary>
         /// Updates a user with a given id
         /// </summary>
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(User), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public IActionResult Update(ApiVersion version, int id, User user)
+        public IActionResult Update(ApiVersion version, string id, User user)
         {
             try
             {
@@ -129,7 +110,7 @@ namespace bootcamp_api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(string id)
         {
             try
             {

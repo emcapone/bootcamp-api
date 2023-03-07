@@ -25,7 +25,7 @@ namespace bootcamp_api.Services
             _mapper = mapper;
         }
 
-        public Dto.CalendarEvent[] Get(ApiVersion version, int user_id, int month = 0, int year = 0)
+        public Dto.CalendarEvent[] Get(ApiVersion version, string user_id, int month = 0, int year = 0)
         {
             var query = _context.CalendarEvents.Where(e => e.User_id == user_id);
 
@@ -57,7 +57,7 @@ namespace bootcamp_api.Services
             return dto;
         }
 
-        public Dto.CalendarEvent Add(ApiVersion version, int user_id, Dto.CalendarEvent calendarEvent)
+        public Dto.CalendarEvent Add(ApiVersion version, string user_id, Dto.CalendarEvent calendarEvent)
         {
             var dupe = _context.CalendarEvents.SingleOrDefault(e => (e.Date == calendarEvent.Date && e.Name == calendarEvent.Name));
             if (dupe is not null)

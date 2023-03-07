@@ -8,8 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using bootcamp_api.Schema;
 using HotChocolate.Types.Pagination;
 using Azure.Storage.Blobs;
+using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddMicrosoftIdentityWebApi(builder.Configuration);
+builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
 {
@@ -18,7 +23,7 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("*");
             policy.WithMethods("GET", "POST", "OPTIONS", "PUT", "DELETE");
-            policy.WithHeaders("Content-Type");
+            policy.AllowAnyHeader();
         });
 });
 
@@ -110,8 +115,14 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseRouting();
 app.UseCors();
+
+app.UseHttpsRedirection();
+
+app.UseRouting();
+
+app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.UseWebSockets();
@@ -120,8 +131,6 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
-
-app.UseHttpsRedirection();
 
 app.UseSwagger();
 
