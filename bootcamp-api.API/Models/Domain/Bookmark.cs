@@ -8,7 +8,7 @@ namespace Domain
         [Key]
         public int Id { get; set; }
         [Required]
-        public int User_id { get; set; }
+        public string User_id { get; set; } = string.Empty;
         [Required]
         public int Petfinder_id { get; set; }
         [Required]
