@@ -15,7 +15,7 @@ namespace bootcamp_api.Services
             _blobContainerClient = blobServiceClient.GetBlobContainerClient("pet-files");
         }
 
-        public async Task<FileLink> UploadAsync(IFormFile file, int user_id, int pet_id, string folder)
+        public async Task<FileLink> UploadAsync(IFormFile file, string user_id, int pet_id, string folder)
         {
 
             if (file.Length <= 0)

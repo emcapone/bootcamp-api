@@ -6,10 +6,9 @@ namespace bootcamp_api.Services
 {
     public interface IUserService
     {
-        User Authenticate(ApiVersion version, Credentials credentials);
-        User Get(ApiVersion version, int id);
+        User Get(ApiVersion version, string id);
         User Add(ApiVersion version, User user);
-        void Delete(int id);
-        User Update(ApiVersion version, int id, User user);
+        void Delete(string id);
+        User Update(ApiVersion version, string id, User user);
     }
 }

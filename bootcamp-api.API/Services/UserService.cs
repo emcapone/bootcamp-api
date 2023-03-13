@@ -25,18 +25,7 @@ namespace bootcamp_api.Services
             _mapper = mapper;
         }
 
-        public Dto.User Authenticate(ApiVersion version, Dto.Credentials credentials)
-        {
-            var user = _context.Users.SingleOrDefault(u => u.Email == credentials.Email);
-            if (user == null || user.Password != credentials.Password)
-                throw new UnauthorizedException();
-
-            var dto = _mapper.Map<User, Dto.User>(user);
-            dto.Link = LinkService.GenerateUserLink(version, dto.Id);
-            return dto;
-        }
-
-        public Dto.User Get(ApiVersion version, int id)
+        public Dto.User Get(ApiVersion version, string id)
         {
             var user = _context.Users.SingleOrDefault(u => u.Id == id);
             if (user == null)
@@ -49,20 +38,15 @@ namespace bootcamp_api.Services
 
         public Dto.User Add(ApiVersion version, Dto.User user)
         {
-            var dupe = _context.Users.SingleOrDefault(u => u.Email == user.Email);
+            var dupe = _context.Users.SingleOrDefault(u => u.Id == user.Id);
             if (dupe is not null)
-                throw new DuplicateUserException(user.Email);
+                throw new DuplicateUserException(dupe.Id);
 
-            DateTime now = DateTime.Now;
             var newUser = new User
             {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Birthday = user.Birthday,
-                Email = user.Email,
-                Password = user.Password,
-                DateAdded = now,
-                DateModified = now
+                Id = user.Id,
+                PreferredFirstName= user.PreferredFirstName,
+                Username= user.Username
             };
 
             _context.Users.Add(newUser);
@@ -73,7 +57,7 @@ namespace bootcamp_api.Services
             return dto;
         }
 
-        public void Delete(int id)
+        public void Delete(string id)
         {
             var user = _context.Users.SingleOrDefault(u => u.Id == id);
             if (user == null)
@@ -83,7 +67,7 @@ namespace bootcamp_api.Services
             _context.SaveChanges();
         }
 
-        public Dto.User Update(ApiVersion version, int id, Dto.User updatedUser)
+        public Dto.User Update(ApiVersion version, string id, Dto.User updatedUser)
         {
             if (id != updatedUser.Id)
                 throw new Exception();
@@ -92,16 +76,8 @@ namespace bootcamp_api.Services
             if (currentUser == null)
                 throw new UserNotFoundException(id);
 
-            var dupe = _context.Users.SingleOrDefault(u => u.Email == updatedUser.Email);
-            if (dupe is not null && dupe != currentUser)
-                throw new DuplicateUserException(updatedUser.Email);
-
-            currentUser.FirstName = updatedUser.FirstName;
-            currentUser.LastName = updatedUser.LastName;
-            currentUser.Birthday = updatedUser.Birthday;
-            currentUser.Email = updatedUser.Email;
-            currentUser.Password = updatedUser.Password;
-            currentUser.DateModified = DateTime.Now;
+            currentUser.PreferredFirstName = updatedUser.PreferredFirstName;
+            currentUser.Username = updatedUser.Username;
 
             _context.SaveChanges();
 
@@ -109,7 +85,5 @@ namespace bootcamp_api.Services
             dto.Link = LinkService.GenerateUserLink(version, dto.Id);
             return dto;
         }
-
-
     }
 }

@@ -23,7 +23,7 @@ namespace bootcamp_api.Services
             _context = context;
         }
 
-        public Dto.Bookmark[] GetAll(ApiVersion version, int user_id, int pf_version)
+        public Dto.Bookmark[] GetAll(ApiVersion version, string user_id, int pf_version)
         {
             var bookmarks = _context.Bookmarks.Where(b => b.User_id == user_id);
             var bookmarkAry = bookmarks.OrderBy(b => b.Id).ToArray();
@@ -48,7 +48,7 @@ namespace bootcamp_api.Services
             return dto;
         }
 
-        public Dto.Bookmark Add(ApiVersion version, int user_id, int pf_version, Dto.Bookmark bookmark)
+        public Dto.Bookmark Add(ApiVersion version, string user_id, int pf_version, Dto.Bookmark bookmark)
         {
             var dupe = _context.Bookmarks.SingleOrDefault(b => b.Petfinder_id == bookmark.Petfinder_id);
             if (dupe is not null)

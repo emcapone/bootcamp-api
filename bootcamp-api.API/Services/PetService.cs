@@ -25,7 +25,7 @@ namespace bootcamp_api.Services
             _mapper = mapper;
         }
 
-        public Dto.PetListItem[] GetAll(ApiVersion version, int user_id)
+        public Dto.PetListItem[] GetAll(ApiVersion version, string user_id)
         {
             var pets = _context.Pets.Where(p => p.User_id == user_id).Select(p => new Dto.PetListItem()
             {
@@ -68,7 +68,7 @@ namespace bootcamp_api.Services
             return dto;
         }
 
-        public Dto.Pet Add(ApiVersion version, int user_id, Dto.Pet pet)
+        public Dto.Pet Add(ApiVersion version, string user_id, Dto.Pet pet)
         {
             DateTime now = DateTime.Now;
 

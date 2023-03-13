@@ -7,21 +7,9 @@ namespace Domain
     public class User
     {
         [Key]
-        public int Id { get; set; }
-        [Required]
-        public string FirstName { get; set; } = string.Empty;
-        [Required]
-        public string LastName { get; set; } = string.Empty;
-        [Required]
-        public DateTime Birthday { get; set; }
-        [Required]
-        public string Email { get; set; } = string.Empty;
-        [Required]
-        public string Password { get; set; } = string.Empty;
-        [Required]
-        public DateTime DateAdded { get; set; }
-        [Required]
-        public DateTime DateModified { get; set; }
+        public string Id { get; set; } = String.Empty;
+        public string? PreferredFirstName { get; set; }
+        public string? Username { get; set; }
 
         [ForeignKey("User_id")]
         public List<Pet> Pets { get; set; } = new List<Pet>();

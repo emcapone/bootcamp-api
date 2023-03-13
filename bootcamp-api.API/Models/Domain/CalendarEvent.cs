@@ -22,6 +22,6 @@ namespace Domain
         [Required]
         public DateTime DateModified { get; set; }
         [Required]
-        public int User_id { get; set; }
+        public string User_id { get; set; } = string.Empty;
     }
 }

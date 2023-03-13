@@ -9,7 +9,7 @@ namespace bootcamp_api.Schema
         [UsePaging(IncludeTotalCount = true)]
         [UseFiltering]
         [UseSorting]
-        public List<PetListItem> GetPetListItems([Service] IPetService petService, int userId)
+        public List<PetListItem> GetPetListItems([Service] IPetService petService, string userId)
         {
             return petService.GetAll(new ApiVersion(1, 0), userId).ToList();
         }

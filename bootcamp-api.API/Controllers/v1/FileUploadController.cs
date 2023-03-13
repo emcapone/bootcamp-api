@@ -10,6 +10,8 @@ using Dto;
 using bootcamp_api.Services;
 using Azure.Storage.Blobs.Models;
 using bootcamp_api.Exceptions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Identity.Web.Resource;
 
 namespace bootcamp_api.Controllers
 {
@@ -18,6 +20,8 @@ namespace bootcamp_api.Controllers
     /// Handles incoming HTTP requests for uploading files
     /// </summary>
     [ApiController]
+    [Authorize]
+    [RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
     [ApiVersion("1.0")]
     [Produces("application/json")]
     [Consumes("multipart/form-data")]
@@ -49,7 +53,7 @@ namespace bootcamp_api.Controllers
         [HttpPost("{user_id}/{pet_id}/{folder}"), DisableRequestSizeLimit]
         [ProducesResponseType(typeof(FileLink), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Upload(int user_id, int pet_id, string folder)
+        public async Task<IActionResult> Upload(string user_id, int pet_id, string folder)
         {
             try
             {

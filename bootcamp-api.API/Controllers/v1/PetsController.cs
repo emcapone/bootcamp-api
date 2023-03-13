@@ -5,6 +5,9 @@ using bootcamp_api.Services;
 using Microsoft.Extensions.Hosting;
 using Dto;
 using System;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Identity.Web.Resource;
+using System.Security.Claims;
 
 namespace bootcamp_api.Controllers
 {
@@ -13,6 +16,8 @@ namespace bootcamp_api.Controllers
     /// Handles incoming HTTP requests for pets
     /// </summary>
     [ApiController]
+    [Authorize]
+    [RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
     [ApiVersion("1.0")]
     [Produces("application/json")]
     [Consumes("application/json")]
@@ -35,7 +40,7 @@ namespace bootcamp_api.Controllers
         /// </summary>
         [HttpGet("GetAll/{user_id}")]
         [ProducesResponseType(typeof(PetListItem[]), StatusCodes.Status200OK)]
-        public IActionResult GetAll(ApiVersion version, int user_id)
+        public IActionResult GetAll(ApiVersion version, string user_id)
         {
             return new OkObjectResult(_petService.GetAll(version, user_id));
         }
@@ -64,7 +69,7 @@ namespace bootcamp_api.Controllers
         [HttpPost("{user_id}")]
         [ProducesResponseType(typeof(Pet), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public IActionResult Create(ApiVersion version, int user_id, Pet pet)
+        public IActionResult Create(ApiVersion version, string user_id, Pet pet)
         {
             try
             {
